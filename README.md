@@ -1,4 +1,4 @@
-<a name="readme-top"></a>
+<a name="doric-framework-readme-top"></a>
 <h1 align="center">Doric Framework</h1>
 
 <!-- TABLE OF CONTENTS -->
@@ -30,7 +30,7 @@
 npm install --save doric-framework
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
 <!-- USAGE EXAMPLES -->
@@ -60,7 +60,7 @@ const workspace = [
 </template>
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
 ### Writing Widgets
@@ -119,7 +119,7 @@ export default {
 
 </details>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
 ### Passing Widgets to Doric
@@ -158,11 +158,11 @@ import widgets from "@/components/doric-widgets/Widgets"
 </template>
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
