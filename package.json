@@ -17,7 +17,7 @@
   },
   "main": "./dist/doric-framework.umd.cjs",
   "module": "./dist/doric-framework.js",
-  "types": "./dist/doric-framework.d.ts",
+  "types": "./dist/types/main.d.ts",
   "files": [
     "dist"
   ],
