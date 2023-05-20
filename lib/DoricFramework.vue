@@ -1,5 +1,5 @@
 <script setup>
-import { defineComponent, nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import draggable from "vuedraggable";
