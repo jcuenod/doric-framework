@@ -28,8 +28,7 @@
       "import": "./dist/doric-framework.js",
       "require": "./dist/doric-framework.umd.cjs"
     },
-    "./dist/style.css": "./dist/style.css",
-    "./types.d.ts": "./types.d.ts"
+    "./dist/style.css": "./dist/style.css"
   },
   "scripts": {
     "dev": "vite",
