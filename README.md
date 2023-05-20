@@ -1,5 +1,5 @@
 <a name="readme-top"></a>
-<h1 align="center">Doric Framework</h3>
+<h1 align="center">Doric Framework</h1>
 
 <!-- TABLE OF CONTENTS -->
 <details>
