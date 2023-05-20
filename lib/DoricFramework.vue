@@ -122,7 +122,7 @@ const addWidget = (widgetType: keyof typeof props.widgets, column: number) => {
 
 const handleRearrange = (colIndex: number, event: any[]) => {
   Object.entries(event).forEach(([method, details]) => {
-    if (details?.element?.id && details?.newIndex) {
+    if (details?.element?.id && Number.isInteger(details?.newIndex)) {
       const widgetId = details.element.id
       const newIndex = details.newIndex
       if (method === "moved" || method === "added") {
