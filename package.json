@@ -1,6 +1,5 @@
 {
   "name": "doric-framework",
-  "private": true,
   "version": "0.0.1",
   "main": "./dist/doric-framework.umd.cjs",
   "module": "./dist/doric-framework.js",
