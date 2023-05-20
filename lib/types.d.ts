@@ -1,22 +1,22 @@
-type WidgetComponentMap = {
+export type WidgetComponentMap = {
     [widgetKey: string]: {
         defaultLabel: string,
         widget: Function,
     }
 }
 
-type WidgetId = string
+export type WidgetId = string
 
-type MinimalInput = {
+export type MinimalInput = {
     value?: string
     shared?: boolean
     subscriptions: WidgetId[]
 }
-type MinimalInputs = {
+export type MinimalInputs = {
     [key: string]: MinimalInput
 }
 
-type Inputs = {
+export type Inputs = {
     [key: string]: {
         value: string
         shared: boolean
@@ -24,41 +24,45 @@ type Inputs = {
     }
 }
 
-type MinimalWidget = {
+export type MinimalWidget = {
     type: string
     id?: WidgetId
     label?: string
     inputs?: MinimalInputs
 }
 
-type WidgetWithInputs = {
+export type WidgetWithInputs = {
     type: string
     inputs: MinimalInputs
 }
 
-type Widget = {
+export type Widget = {
     id: WidgetId
     type: string
     label: string
     inputs: Inputs
 }
 
-type Workspace = Widget[][]
+export type Workspace = Widget[][]
 
-type MinimalWorkspace = MinimalWidget[][]
+export type MinimalWorkspace = MinimalWidget[][]
 
-type SharedParameters = {
+export type SharedParameters = {
     widgetId: string
     key: string
     value: string
 }
 
-type WidgetInputState = {
+export type WidgetInputState = {
     widgetId: string
     key: string
     value: any
 }
 
-type DefaultLabels = {
+export type DefaultLabels = {
     [key: string]: string
+}
+
+export type UseDoricInputOptions = {
+    shared?: boolean
 }

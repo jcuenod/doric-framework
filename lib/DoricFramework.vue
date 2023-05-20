@@ -1,8 +1,14 @@
-<script setup>
-import { nextTick, ref, watch } from 'vue'
+<script setup lang="ts">
+import type {
+  Workspace,
+  WidgetInputState,
+  UseDoricInputOptions,
+  WidgetId,
+} from './types'
+import { defineComponent, nextTick, ref, watch } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import draggable from "vuedraggable";
+import draggable from "vuedraggable"
 import {
   getUseDoricInput,
   getUseDoricOutput,
@@ -18,14 +24,17 @@ import {
   setDefaultLabels,
 } from './doric'
 
+// defineProps for vue and typescript
 const props = defineProps({
   widgets: {
     type: Object,
     required: true,
+    default: () => ({}),
   },
   workspace: {
     type: Object,
     required: true,
+    default: () => ([[]]),
   },
   initialState: {
     type: Object,
@@ -38,28 +47,28 @@ setDefaultLabels(Object.fromEntries(Object.keys(props.widgets).map(key => [key, 
 
 const emit = defineEmits(['setSharedParameters'])
 
-import DoricWidgetConfig from './components/WidgetConfig.vue';
-import DoricMissingWidget from './components/MissingWidget.vue';
+import DoricWidgetConfig from './components/WidgetConfig.vue'
+import DoricMissingWidget from './components/MissingWidget.vue'
 
 const loadingWorkspace = ref(false)
-const configWidget = ref(false)
+const configWidget = ref("")
 const showWidgetsToAddColumn = ref(-1)
 
-const pushWorkspace = (newWorkspace) => {
+const pushWorkspace = (newWorkspace: Workspace) => {
   if (!newWorkspace) {
     return
   }
   loadingWorkspace.value = true
-  configWidget.value = false
+  configWidget.value = ""
   showWidgetsToAddColumn.value = -1
   setWorkspace(newWorkspace).then(() => {
     loadingWorkspace.value = false
   })
 }
-watch(() => props.workspace, pushWorkspace)
-pushWorkspace(props.workspace)
+watch(() => props.workspace as Workspace, pushWorkspace)
+pushWorkspace(props.workspace as Workspace)
 
-const pushState = (newInitialState) => {
+const pushState = (newInitialState: WidgetInputState[]) => {
   if (!newInitialState) {
     return
   }
@@ -72,37 +81,37 @@ const pushState = (newInitialState) => {
   }
   nextTick(waitForWorkspace)
 }
-watch(() => props.initialState, pushState)
-pushState(props.initialState)
+watch(() => props.initialState as WidgetInputState[], pushState)
+pushState(props.initialState as WidgetInputState[])
 
 watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
   emit("setSharedParameters", newSharedParameters, oldSharedParameters)
 })
 
-const configureWidget = (widgetId) => {
+const configureWidget = (widgetId: WidgetId) => {
   if (configWidget.value === widgetId) {
-    configWidget.value = false
+    configWidget.value = ""
     return
   }
   showWidgetsToAddColumn.value = -1
   configWidget.value = widgetId
 }
 
-const removeWidget = (widgetId) => {
-  configWidget.value = false
+const removeWidget = (widgetId: WidgetId) => {
+  configWidget.value = ""
   removeDoricWidget(widgetId)
 }
 
-const setColumnToAddWidget = (column) => {
+const setColumnToAddWidget = (column: number) => {
   if (showWidgetsToAddColumn.value === column) {
     showWidgetsToAddColumn.value = -1
     return
   }
-  configWidget.value = false
+  configWidget.value = ""
   showWidgetsToAddColumn.value = column
 }
 
-const addWidget = (widgetType, column) => {
+const addWidget = (widgetType: keyof typeof props.widgets, column: number) => {
   addDoricWidget({
     id: widgetType.replace("-widget", "-0"),
     type: widgetType,
@@ -110,12 +119,18 @@ const addWidget = (widgetType, column) => {
   showWidgetsToAddColumn.value = -1
 }
 
-const handleRearrange = (colIndex, event) => {
+
+const handleRearrange = (colIndex: number, event: any[]) => {
   Object.entries(event).forEach(([method, details]) => {
-    const widgetId = details.element.id
-    const newIndex = details.newIndex
-    if (method === "moved" || method === "added") {
-      moveDoricWidget(widgetId, colIndex, newIndex)
+    if (details?.element?.id && details?.newIndex) {
+      const widgetId = details.element.id
+      const newIndex = details.newIndex
+      if (method === "moved" || method === "added") {
+        moveDoricWidget(widgetId, colIndex, newIndex)
+      }
+    }
+    else {
+      console.warn("Unknown event from vuedraggable:", event)
     }
     // Technically there is also the `method === "removed"`
     // We are not handling it, because we know that when a 
@@ -124,7 +139,7 @@ const handleRearrange = (colIndex, event) => {
   })
 }
 
-const createColumnForWidget = (first, event) => {
+const createColumnForWidget = (first: boolean, event: any[]) => {
   const colIndex = first ? 0 : getWorkspaceShape().length
   insertColumn(colIndex)
   Object.entries(event).forEach(([method, details]) => {
@@ -134,12 +149,34 @@ const createColumnForWidget = (first, event) => {
     }
   })
 }
+
+defineComponent({
+  name: 'DoricFramework',
+  props: {
+    widgets: {
+      type: Object,
+      required: true,
+      default: () => ({}),
+    },
+    workspace: {
+      type: Object,
+      required: true,
+      default: () => ([[]]),
+    },
+    initialState: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
+  },
+  emits: ['setSharedParameters'],
+})
 </script>
 
 <template>
   <div class="doric-widget-framework">
     <draggable class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(true, $event)" itemKey="id">
-      <template #item="{ element, index }">
+      <template>
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>
     </draggable>
@@ -149,7 +186,7 @@ const createColumnForWidget = (first, event) => {
 
         <draggable class="list-group" :list="column" group="widgets" @change="handleRearrange(index, $event)" itemKey="id"
           handle=".drag-handle">
-          <template #item="{ element, index }">
+          <template #item="{ element }">
             <div class="doric-widget-framework__widget" :class="{ 'config-mode': configWidget === element.id }">
               <header class="drag-handle">
                 <span>
@@ -166,8 +203,9 @@ const createColumnForWidget = (first, event) => {
               </div>
               <div :class="{ 'hidden': configWidget === element.id }">
                 <component v-if="element?.type in widgets && 'widget' in widgets[element.type]"
-                  :is="widgets[element.type].widget" :useDoricOutput="param => getUseDoricOutput(element.id, param)"
-                  :useDoricInput="(param, options) => getUseDoricInput(element.id, param, options)" />
+                  :is="widgets[element.type].widget"
+                  :useDoricOutput="(param: string) => getUseDoricOutput(element.id, param)"
+                  :useDoricInput="(param: string, options: UseDoricInputOptions) => getUseDoricInput(element.id, param, options)" />
                 <DoricMissingWidget :type="element?.type" v-else />
               </div>
             </div>
@@ -196,7 +234,7 @@ const createColumnForWidget = (first, event) => {
       </pane>
     </splitpanes>
     <draggable class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(false, $event)" itemKey="id">
-      <template #item="{ element, index }">
+      <template>
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>
     </draggable>

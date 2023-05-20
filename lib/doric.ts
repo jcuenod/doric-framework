@@ -1,3 +1,13 @@
+import type {
+  Widget,
+  MinimalWidget,
+  WidgetInputState,
+  MinimalInputs,
+  Inputs,
+  Workspace,
+  DefaultLabels,
+  UseDoricInputOptions,
+} from "./types"
 import {
   defineStore
 } from 'pinia'
@@ -187,7 +197,7 @@ const getWidgetIds = () => {
   return store.widgetIds
 }
 
-const addWidget = (widget: Widget, column: number) => {
+const addWidget = (widget: MinimalWidget, column: number) => {
   const store = useDoricStore()
   store.addWidget(widget, column)
 }
@@ -203,7 +213,7 @@ const moveWidget = (widgetId: string, newColumnIndex: number, newRowIndex: numbe
   if (!widget) {
     throw new Error(`Widget with id "${widgetId}" not found`)
   }
-  store.columns = store.columns.map((column, i) => {
+  store.columns = store.columns.map(column => {
     return column.filter(w => w.id !== widgetId)
   }).map((column, i) => {
     if (i === newColumnIndex) {
@@ -272,9 +282,6 @@ const getUseDoricOutput = (widgetId: string, key: string) => (value: any) => {
   })
 }
 
-type UseDoricInputOptions = {
-  shared?: boolean
-}
 const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputOptions) => {
   const store = useDoricStore()
 

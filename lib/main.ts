@@ -1,3 +1,5 @@
 import DoricFramework from './DoricFramework.vue'
 
-export { DoricFramework }
+export {
+    DoricFramework
+}

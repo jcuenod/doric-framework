@@ -1,20 +1,26 @@
-<script setup>
+<script lang="ts" setup>
+import type {
+  WidgetId
+} from '../types'
 import {
   getWidget,
   getWidgetIds,
 } from '../doric'
 
 const props = defineProps({
-  widgetId: String
+  widgetId: {
+    type: String,
+    required: true,
+  }
 })
 
 const widget = getWidget(props.widgetId)
 const widgetIds = getWidgetIds()
 
-const isSubscribedTo = (key, widgetId) =>
+const isSubscribedTo = (key: string, widgetId: WidgetId) =>
   widget.inputs[key].subscriptions.includes(widgetId)
 
-const toggleSubscription = (key, widgetId) => {
+const toggleSubscription = (key: string, widgetId: WidgetId) => {
   const checked = !isSubscribedTo(key, widgetId)
 
   // Update the subscription's widgetSubscriptions
@@ -29,12 +35,12 @@ const toggleSubscription = (key, widgetId) => {
   }
   widget.inputs[key].subscriptions = [...newKeySubscriptions]
 }
-const subscribeToAll = (key) => {
+const subscribeToAll = (key: string) => {
   const newKeySubscriptions = [...widgetIds]
   widget.inputs[key].subscriptions = newKeySubscriptions
 }
 
-const toggleShared = (key) => {
+const toggleShared = (key: string) => {
   widget.inputs[key].shared = !widget.inputs[key].shared
 }
 </script>
