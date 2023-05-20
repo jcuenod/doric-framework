@@ -176,7 +176,7 @@ defineComponent({
 <template>
   <div class="doric-widget-framework">
     <draggable class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(true, $event)" itemKey="id">
-      <template>
+      <template #item="_">
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>
     </draggable>
@@ -234,7 +234,7 @@ defineComponent({
       </pane>
     </splitpanes>
     <draggable class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(false, $event)" itemKey="id">
-      <template>
+      <template #item="_">
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>
     </draggable>
