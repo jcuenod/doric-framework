@@ -1,6 +1,20 @@
 {
   "name": "doric-framework",
   "version": "0.0.3",
+  "description": "A column-based widget UI framework for Vue 3",
+  "keywords": [
+    "doric",
+    "column-layout",
+    "widgets",
+    "widget-ui",
+    "draggable"
+  ],
+  "author": "James Cuénod",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jcuenod/doric-framework/"
+  },
   "main": "./dist/doric-framework.umd.cjs",
   "module": "./dist/doric-framework.js",
   "files": [
