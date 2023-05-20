@@ -1,30 +1,38 @@
 <a name="doric-framework-readme-top"></a>
-<h1 align="center">Doric Framework</h1>
+<header><h1 align="center">Doric Framework</h1></header>
 
 <!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-        <a href="#about-the-project">About the Project</a>
-        <ol>
-            <li><a href="#installation">Installation</a></li>
-        </ol>
-    </li>
-    <li>
-        <a href="#usage">Usage</a>
-        <ol>
-            <li><a href="#basic-usage">Basic Usage</a></li>
-            <li><a href="#writing-widgets">Writing Widgets</a></li>
-            <li><a href="#passing-widgets-to-doric">Passing Widgets to Doric</a></li>
-        </ol>
-    </li>
-  </ol>
-</details>
+# Table of Contents
+
+- [About the Project](#about-the-project)
+    - [Description](#description)
+    - [Dependencies](#dependencies)
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Basic Usage](#basic-usage)
+    - [Writing Widgets](#writing-widgets)
+    - [Passing Widgets to Doric](#passing-widgets-to-doric)
+- [License](#license)
 
 # About the Project
 
-## Installation
+## Description
+
+Doric Framework is a column-based widget UI framework for Vue 3. It displays custom widgets in a `workspace`, allowing users to drag and drop widgets into columns and rearrange them.
+
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
+
+
+## Dependencies
+
+- [pinia](https://pinia.esm.dev/)
+- [splitpanes](https://github.com/antoniandre/splitpanes)
+- [vuedraggable](https://github.com/SortableJS/vue.draggable.next/)
+
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
+
+
+# Installation
 
 ```sh
 npm install --save doric-framework
@@ -34,9 +42,9 @@ npm install --save doric-framework
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
+# Usage
 
-### Basic Usage
+## Basic Usage
 
 ```vue
 <script setup lang="ts">
@@ -63,7 +71,7 @@ const workspace = [
 <p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
-### Writing Widgets
+## Writing Widgets
 
 Doric displays instance of widgets, which are Vue components. A minimal widget is defined as follows:
 
@@ -122,7 +130,7 @@ export default {
 <p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
-### Passing Widgets to Doric
+## Passing Widgets to Doric
 
 Doric expects a list of widgets to be passed to it. This list is a map of widget types to default labels and widget components. It is typical to import all the widgets in a single file and pass them to Doric.
 
@@ -161,7 +169,7 @@ import widgets from "@/components/doric-widgets/Widgets"
 <p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
-## License
+# License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
