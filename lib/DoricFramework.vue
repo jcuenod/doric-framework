@@ -210,16 +210,20 @@ defineComponent({
         </draggable>
 
         <div class="column-buttons">
-          <button v-if="column.length === 0" @click="() => removeColumn(index)">
-            Remove Column
-          </button>
+          <div class="center">
+            <button v-if="column.length === 0" @click="() => removeColumn(index)">
+              Remove Column
+            </button>
+          </div>
           <div>
-            <button v-if="showWidgetsToAddColumn === -1" @click="() => setColumnToAddWidget(index)">
-              +
-            </button>
-            <button v-else-if="showWidgetsToAddColumn === index" @click="() => setColumnToAddWidget(-1)">
-              x
-            </button>
+            <div class="center">
+              <button v-if="showWidgetsToAddColumn === -1" @click="() => setColumnToAddWidget(index)">
+                +
+              </button>
+              <button v-else-if="showWidgetsToAddColumn === index" @click="() => setColumnToAddWidget(-1)">
+                x
+              </button>
+            </div>
             <div v-show="showWidgetsToAddColumn === index" class="add-widget-list">
               <button v-for="(widgetType) in Object.keys(widgets)" :key="widgetType"
                 @click="() => addWidget(widgetType, index)">
@@ -286,6 +290,12 @@ defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
     .add-widget-list {
       display: flex;
