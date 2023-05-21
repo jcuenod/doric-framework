@@ -129,9 +129,6 @@ const handleRearrange = (colIndex: number, event: any[]) => {
         moveDoricWidget(widgetId, colIndex, newIndex)
       }
     }
-    else {
-      console.warn("Unknown event from vuedraggable:", event)
-    }
     // Technically there is also the `method === "removed"`
     // We are not handling it, because we know that when a 
     // widget is "added" by draggable, it is also "removed" 
