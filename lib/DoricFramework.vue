@@ -249,6 +249,8 @@ defineComponent({
   flex-direction: row;
   flex: 1;
   margin: 0 0.1rem;
+  overflow: hidden;
+  height: 100%;
 
   .doric-widget-framework__widget {
     border: 1px solid #000;
@@ -318,6 +320,10 @@ defineComponent({
 <style lang="scss" global>
 .splitpanes {
   height: auto;
+
+  .splitpanes__pane {
+    overflow: auto;
+  }
 }
 
 .splitpanes--vertical>.splitpanes__splitter {
