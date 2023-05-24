@@ -127,15 +127,24 @@ const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
   } as Widget
 }
 
-const widgetWithUniqueId = (w: Widget, widgetIds: string[]) => {
+const widgetWithUniqueId: (
+  w: Widget,
+  widgetIds: string[]
+) => Widget = (w: Widget, widgetIds: string[]) => {
   if (!w.id || widgetIds.includes(w.id)) {
     const newW = { ...w }
     // Get lowest available id
     const prefix = w.type.replace("-widget", "")
-    const ids = widgetIds.filter(id => id.startsWith(prefix)).map(id => parseInt(id.replace(prefix + "-", "")))
+    const ids = widgetIds.filter(id => id.startsWith(prefix))
+      .map(id => parseInt(id.replace(prefix + "-", "")))
+      .filter(id => !isNaN(id))
     const newId = Math.max(-1, ...ids) + 1
     newW["id"] = `${prefix}-${newId}`
     return newW
+  }
+  else if (w.id === w.type) {
+    const newW = { ...w, id: `${w.type}-0` }
+    return widgetWithUniqueId(newW, widgetIds)
   }
   return w
 }
