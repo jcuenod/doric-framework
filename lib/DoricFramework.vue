@@ -168,6 +168,37 @@ defineComponent({
   },
   emits: ['setSharedParameters'],
 })
+
+const widgetOfInterest = ref("")
+const setWidgetOfInterest = (widgetId: WidgetId) => {
+  console.log("setWidgetOfInterest", widgetId, widgetOfInterest.value)
+  widgetOfInterest.value = widgetId
+}
+
+const getBorderColor = (widgetId: WidgetId) => {
+  if (configWidget.value === widgetId && widgetOfInterest.value === widgetId) {
+    return "border-blue-800"
+  }
+  if (configWidget.value === widgetId) {
+    return "border-blue-600"
+  }
+  if (widgetOfInterest.value === widgetId) {
+    return "border-green-400"
+  }
+  return "border-gray-200"
+}
+const getHeaderColor = (widgetId: WidgetId) => {
+  if (configWidget.value === widgetId && widgetOfInterest.value === widgetId) {
+    return "bg-blue-500"
+  }
+  if (configWidget.value === widgetId) {
+    return "bg-blue-200"
+  }
+  if (widgetOfInterest.value === widgetId) {
+    return "bg-green-200"
+  }
+  return "bg-gray-100"
+}
 </script>
 
 <template>
@@ -178,22 +209,21 @@ defineComponent({
       </template>
     </draggable>
     <splitpanes>
-      <pane min-size="20" v-for="(column, index) in getWorkspaceShape()" :key="index"
+      <pane min-size="20" v-for="(column, index) in     getWorkspaceShape()    " :key="index"
         :size="100 / getWorkspaceShape().length">
 
         <draggable class="list-group" :list="column" group="widgets" @change="handleRearrange(index, $event)" itemKey="id"
           handle=".drag-handle">
           <template #item="{ element }">
-            <div class="doric-widget-framework__widget border-2 border-gray-200 rounded m-1"
-              :class="{ 'config-mode': configWidget === element.id }">
-              <header class="drag-handle bg-gray-100 p-1">
-                <span class="text-gray-900 text-sm font-bold ml-2">
+            <div class="doric-widget-framework__widget border-2 rounded m-1" :class="getBorderColor(element.id)">
+              <header class="drag-handle p-1" :class="getHeaderColor(element.id)">
+                <div class="text-gray-900 text-sm font-bold ml-2">
                   {{ !configWidget ? element.label : element.id }}
-                </span>
-                <span class="config-button" :class="{ invisible: configWidget && configWidget !== element.id }">
+                </div>
+                <div class="config-button" :class="{ invisible: configWidget && configWidget !== element.id }">
                   <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
-                    @click="() => configureWidget(element.id)"
-                    class="p-1 rounded text-gray-600 hover:bg-gray-300 hover:text-black active:bg-gray-400 active:scale-90">
+                    @click="() => configureWidget(element.id)" class="p-1 rounded active:scale-90"
+                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-300 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
                     <!-- `cog-6-tooth` icon from https://heroicons.com/, MIT license -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="w-5 h-5">
@@ -202,18 +232,18 @@ defineComponent({
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </button>
-                  <button @click="() => removeWidget(element.id)"
-                    class="p-1 rounded text-gray-600 hover:bg-gray-300 hover:text-black active:bg-gray-400 active:scale-90">
+                  <button @click="() => removeWidget(element.id)" class="p-1 rounded active:scale-90"
+                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-300 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
                     <!-- `x-mark` icon from https://heroicons.com/, MIT license -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="w-5 h-5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
-                </span>
+                </div>
               </header>
               <div v-if="configWidget === element.id">
-                <DoricWidgetConfig :widgetId="element.id" />
+                <DoricWidgetConfig :widgetId="element.id" @setWidgetOfInterest="setWidgetOfInterest" />
               </div>
               <div :class="{ 'hidden': configWidget === element.id }">
                 <component v-if="element?.type in widgets && 'widget' in widgets[element.type]"
@@ -242,7 +272,7 @@ defineComponent({
               </button>
             </div>
             <div class="add-widget-list" :class="{ invisible: showWidgetsToAddColumn !== index }">
-              <button v-for="(widgetType) in Object.keys(widgets)" :key="widgetType"
+              <button v-for="(    widgetType    ) in     Object.keys(widgets)    " :key="widgetType"
                 @click="() => addWidget(widgetType, index)">
                 {{ widgets[widgetType].defaultLabel }}
               </button>
@@ -272,11 +302,12 @@ defineComponent({
   .doric-widget-framework__widget {
 
     &.config-mode {
-      border-color: orange;
+      border-color: rgb(37, 99, 235);
     }
 
     &.sortable-chosen {
-      border: 1px dashed #000;
+      /* border-blue-400 */
+      border: 2px solid rgb(96, 165, 250);
     }
 
     header {
@@ -350,5 +381,9 @@ defineComponent({
   &:hover {
     background-color: #ccc;
   }
+}
+
+.ghost {
+  opacity: 0.7;
 }
 </style>

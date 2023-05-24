@@ -13,6 +13,9 @@ const props = defineProps({
     required: true,
   }
 })
+const emit = defineEmits([
+  'setWidgetOfInterest',
+])
 
 const widget = getWidget(props.widgetId)
 const widgetIds = getWidgetIds()
@@ -42,6 +45,13 @@ const subscribeToAll = (key: string) => {
 
 const toggleShared = (key: string) => {
   widget.inputs[key].shared = !widget.inputs[key].shared
+}
+
+const onMouseEnter = (widgetId: WidgetId) => {
+  emit("setWidgetOfInterest", widgetId)
+}
+const onMouseLeave = () => {
+  emit("setWidgetOfInterest", "")
 }
 </script>
 
@@ -76,7 +86,8 @@ const toggleShared = (key: string) => {
               </td>
               <td>
                 <!-- use checkboxes instead of multi-select -->
-                <span v-for="widgetId in widgetIds" :key="widgetId">
+                <span v-for="widgetId in widgetIds" :key="widgetId" @mouseenter="onMouseEnter(widgetId)"
+                  @mouseleave="onMouseLeave">
                   <input type="checkbox" :id="`${widgetId}.${key}`" class="multi-select"
                     :checked="isSubscribedTo(key, widgetId)" @change="toggleSubscription(key, widgetId)" />
                   <label :for="`${widgetId}.${key}`">
