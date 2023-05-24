@@ -220,10 +220,10 @@ const getHeaderColor = (widgetId: WidgetId) => {
                 <div class="text-gray-900 text-sm font-bold ml-2">
                   {{ !configWidget ? element.label : element.id }}
                 </div>
-                <div class="config-button" :class="{ invisible: configWidget && configWidget !== element.id }">
+                <div :class="{ invisible: configWidget && configWidget !== element.id }">
                   <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
-                    @click="() => configureWidget(element.id)" class="p-1 rounded active:scale-90"
-                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-400 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
+                    @click="() => configureWidget(element.id)" class="config-button"
+                    :class="configWidget === element.id ? 'active-config' : ''">
                     <!-- `cog-6-tooth` icon from https://heroicons.com/, MIT license -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="w-5 h-5">
@@ -232,8 +232,8 @@ const getHeaderColor = (widgetId: WidgetId) => {
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </button>
-                  <button @click="() => removeWidget(element.id)" class="p-1 rounded active:scale-90"
-                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-400 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
+                  <button @click="() => removeWidget(element.id)" class="config-button"
+                    :class="configWidget === element.id ? 'active-config' : ''">
                     <!-- `x-mark` icon from https://heroicons.com/, MIT license -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="w-5 h-5">
@@ -246,10 +246,11 @@ const getHeaderColor = (widgetId: WidgetId) => {
                 <DoricWidgetConfig :widgetId="element.id" @setWidgetOfInterest="setWidgetOfInterest" />
               </div>
               <div :class="{ 'hidden': configWidget === element.id }">
-                <component v-if="element?.type in widgets && 'widget' in widgets[element.type]"
-                  :is="widgets[element.type].widget"
-                  :useDoricOutput="(param: string) => getUseDoricOutput(element.id, param)"
-                  :useDoricInput="(param: string, options: UseDoricInputOptions) => getUseDoricInput(element.id, param, options)" />
+                <div class="widget" v-if="element?.type in widgets && 'widget' in widgets[element.type]">
+                  <component :is="widgets[element.type].widget"
+                    :useDoricOutput="(param: string) => getUseDoricOutput(element.id, param)"
+                    :useDoricInput="(param: string, options: UseDoricInputOptions) => getUseDoricInput(element.id, param, options)" />
+                </div>
                 <DoricMissingWidget :type="element?.type" v-else />
               </div>
             </div>
@@ -316,6 +317,33 @@ const getHeaderColor = (widgetId: WidgetId) => {
       justify-content: space-between;
       align-items: center;
       user-select: none;
+
+      button.config-button {
+        all: initial;
+        cursor: pointer;
+
+        @apply p-1 rounded text-gray-600;
+
+        &:hover {
+          @apply text-black bg-gray-300;
+        }
+
+        &:active {
+          @apply bg-gray-400 scale-90;
+        }
+
+        &.active-config {
+          @apply text-blue-800;
+
+          &:hover {
+            @apply bg-blue-400 text-blue-900;
+          }
+
+          &:active {
+            @apply bg-blue-600;
+          }
+        }
+      }
 
       &.drag-handle {
         cursor: grab;
