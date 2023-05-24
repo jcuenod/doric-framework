@@ -180,24 +180,24 @@ const getBorderColor = (widgetId: WidgetId) => {
     return "border-blue-800"
   }
   if (configWidget.value === widgetId) {
-    return "border-blue-600"
+    return "border-blue-600 hover:border-blue-700"
   }
   if (widgetOfInterest.value === widgetId) {
     return "border-green-400"
   }
-  return "border-gray-200"
+  return "border-gray-200 hover:border-gray-300"
 }
 const getHeaderColor = (widgetId: WidgetId) => {
   if (configWidget.value === widgetId && widgetOfInterest.value === widgetId) {
-    return "bg-blue-500"
+    return "bg-blue-400"
   }
   if (configWidget.value === widgetId) {
-    return "bg-blue-200"
+    return "bg-blue-200 group-hover:bg-blue-300"
   }
   if (widgetOfInterest.value === widgetId) {
     return "bg-green-200"
   }
-  return "bg-gray-100"
+  return "bg-gray-100 group-hover:bg-gray-200"
 }
 </script>
 
@@ -215,7 +215,7 @@ const getHeaderColor = (widgetId: WidgetId) => {
         <draggable class="list-group" :list="column" group="widgets" @change="handleRearrange(index, $event)" itemKey="id"
           handle=".drag-handle">
           <template #item="{ element }">
-            <div class="doric-widget-framework__widget border-2 rounded m-1" :class="getBorderColor(element.id)">
+            <div class="doric-widget-framework__widget border-2 rounded m-1 group" :class="getBorderColor(element.id)">
               <header class="drag-handle p-1" :class="getHeaderColor(element.id)">
                 <div class="text-gray-900 text-sm font-bold ml-2">
                   {{ !configWidget ? element.label : element.id }}
@@ -223,7 +223,7 @@ const getHeaderColor = (widgetId: WidgetId) => {
                 <div class="config-button" :class="{ invisible: configWidget && configWidget !== element.id }">
                   <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
                     @click="() => configureWidget(element.id)" class="p-1 rounded active:scale-90"
-                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-300 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
+                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-400 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
                     <!-- `cog-6-tooth` icon from https://heroicons.com/, MIT license -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="w-5 h-5">
@@ -233,7 +233,7 @@ const getHeaderColor = (widgetId: WidgetId) => {
                     </svg>
                   </button>
                   <button @click="() => removeWidget(element.id)" class="p-1 rounded active:scale-90"
-                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-300 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
+                    :class="configWidget === element.id ? 'text-blue-800 hover:bg-blue-400 active:bg-blue-600 hover:text-blue-900' : 'text-gray-600 hover:text-black hover:bg-gray-300 active:bg-gray-400'">
                     <!-- `x-mark` icon from https://heroicons.com/, MIT license -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="w-5 h-5">
