@@ -22,6 +22,7 @@ import {
   injectWorkspaceState,
   sharedParameters,
   setDefaultLabels,
+  getWidget,
 } from './doric'
 
 // defineProps for vue and typescript
@@ -53,6 +54,10 @@ import DoricMissingWidget from './components/MissingWidget.vue'
 const loadingWorkspace = ref(false)
 const configWidget = ref("")
 const showWidgetsToAddColumn = ref(-1)
+const subscriptionMode = ref({
+  widgetId: "",
+  input: "",
+})
 
 const pushWorkspace = (newWorkspace: Workspace) => {
   if (!newWorkspace) {
@@ -60,6 +65,10 @@ const pushWorkspace = (newWorkspace: Workspace) => {
   }
   loadingWorkspace.value = true
   configWidget.value = ""
+  subscriptionMode.value = {
+    widgetId: "",
+    input: "",
+  }
   showWidgetsToAddColumn.value = -1
   setWorkspace(newWorkspace).then(() => {
     loadingWorkspace.value = false
@@ -91,6 +100,10 @@ watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
 const configureWidget = (widgetId: WidgetId) => {
   if (configWidget.value === widgetId) {
     configWidget.value = ""
+    subscriptionMode.value = {
+      widgetId: "",
+      input: "",
+    }
     return
   }
   showWidgetsToAddColumn.value = -1
@@ -99,6 +112,10 @@ const configureWidget = (widgetId: WidgetId) => {
 
 const removeWidget = (widgetId: WidgetId) => {
   configWidget.value = ""
+  subscriptionMode.value = {
+    widgetId: "",
+    input: "",
+  }
   removeDoricWidget(widgetId)
 }
 
@@ -108,6 +125,10 @@ const setColumnToAddWidget = (column: number) => {
     return
   }
   configWidget.value = ""
+  subscriptionMode.value = {
+    widgetId: "",
+    input: "",
+  }
   showWidgetsToAddColumn.value = column
 }
 
@@ -169,35 +190,67 @@ defineComponent({
   emits: ['setSharedParameters'],
 })
 
-const widgetOfInterest = ref("")
-const setWidgetOfInterest = (widgetId: WidgetId) => {
-  console.log("setWidgetOfInterest", widgetId, widgetOfInterest.value)
-  widgetOfInterest.value = widgetId
+const setSubscriptionMode = (widgetId: WidgetId | null, input: string) => {
+  if (!widgetId) {
+    subscriptionMode.value = {
+      widgetId: "",
+      input: "",
+    }
+    return
+  }
+  subscriptionMode.value = {
+    widgetId,
+    input,
+  }
 }
 
 const getBorderColor = (widgetId: WidgetId) => {
-  if (configWidget.value === widgetId && widgetOfInterest.value === widgetId) {
-    return "border-blue-800"
-  }
-  if (configWidget.value === widgetId) {
-    return "border-blue-600 hover:border-blue-700"
-  }
-  if (widgetOfInterest.value === widgetId) {
-    return "border-green-400"
-  }
-  return "border-gray-200 hover:border-gray-300"
+  return configWidget.value === widgetId
+    ? "border-blue-600 hover:border-blue-700"
+    : "border-gray-200 hover:border-gray-300"
 }
 const getHeaderColor = (widgetId: WidgetId) => {
-  if (configWidget.value === widgetId && widgetOfInterest.value === widgetId) {
-    return "bg-blue-400"
+  return configWidget.value === widgetId
+    ? "bg-blue-200 group-hover:bg-blue-300"
+    : "bg-gray-100 group-hover:bg-gray-200"
+}
+
+const subscriptionClasses = {
+  subscribed: 'subscribed',
+  unsubscribed: 'not-subscribed',
+}
+const isSubscribedTo = (subscriberId: WidgetId, inputKey: string, targetId: WidgetId) => {
+  const subscriber = getWidget(subscriberId)
+  if (!subscriber) {
+    console.error(`Widget not found: ${subscriberId}`)
+    throw new Error(`Widget not found: ${subscriberId}`)
   }
-  if (configWidget.value === widgetId) {
-    return "bg-blue-200 group-hover:bg-blue-300"
+  return subscriber.inputs[inputKey].subscriptions.includes(targetId)
+}
+const getSubscriptionClass = (subscriberId: WidgetId, inputKey: string, targetId: WidgetId) => {
+  return subscriptionClasses[isSubscribedTo(subscriberId, inputKey, targetId)
+    ? 'subscribed'
+    : 'unsubscribed']
+}
+const toggleSubscription = (widgetId: WidgetId) => {
+  if (!subscriptionMode.value.widgetId || !subscriptionMode.value.input) {
+    console.error("Should be impossible: toggleSubscription called without subscriptionMode")
+    return
   }
-  if (widgetOfInterest.value === widgetId) {
-    return "bg-green-200"
+  const subscriber = getWidget(subscriptionMode.value.widgetId)
+  const key = subscriptionMode.value.input
+
+  // Update the subscription's widgetSubscriptions
+  const newKeySubscriptions = [...subscriber.inputs[key].subscriptions]
+  if (!newKeySubscriptions.includes(widgetId)) {
+    newKeySubscriptions.push(widgetId)
+  } else {
+    const index = newKeySubscriptions.indexOf(widgetId)
+    if (index > -1) {
+      newKeySubscriptions.splice(index, 1)
+    }
   }
-  return "bg-gray-100 group-hover:bg-gray-200"
+  subscriber.inputs[key].subscriptions = [...newKeySubscriptions]
 }
 </script>
 
@@ -215,43 +268,56 @@ const getHeaderColor = (widgetId: WidgetId) => {
         <draggable class="list-group" :list="column" group="widgets" @change="handleRearrange(index, $event)" itemKey="id"
           handle=".drag-handle">
           <template #item="{ element }">
-            <div class="doric-widget-framework__widget border-2 rounded m-1 group" :class="getBorderColor(element.id)">
-              <header class="drag-handle p-1" :class="getHeaderColor(element.id)">
-                <div class="text-gray-900 text-sm font-bold ml-2">
-                  {{ !configWidget ? element.label : element.id }}
+            <div class="relative m-1">
+              <button v-if="subscriptionMode.input && configWidget !== element.id"
+                @click="() => toggleSubscription(element.id)" class="subscription-helper"
+                :class="getSubscriptionClass(subscriptionMode.widgetId, subscriptionMode.input, element.id)">
+                <div>
+                  {{ isSubscribedTo(subscriptionMode.widgetId, subscriptionMode.input, element.id)
+                    ? 'Subscribed'
+                    : 'Click to Subscribe' }}
                 </div>
-                <div :class="{ invisible: configWidget && configWidget !== element.id }">
-                  <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
-                    @click="() => configureWidget(element.id)" class="config-button"
-                    :class="configWidget === element.id ? 'active-config' : ''">
-                    <!-- `cog-6-tooth` icon from https://heroicons.com/, MIT license -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                      stroke="currentColor" class="w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </button>
-                  <button @click="() => removeWidget(element.id)" class="config-button"
-                    :class="configWidget === element.id ? 'active-config' : ''">
-                    <!-- `x-mark` icon from https://heroicons.com/, MIT license -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                      stroke="currentColor" class="w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+              </button>
+              <div class="doric-widget-framework__widget border-2 rounded group" :class="getBorderColor(element.id)">
+                <header class="drag-handle p-1" :class="getHeaderColor(element.id)">
+                  <div class="text-gray-900 text-sm font-bold ml-2">
+                    {{ !configWidget ? element.label : element.id }}
+                  </div>
+                  <div :class="{ invisible: configWidget && configWidget !== element.id }">
+                    <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
+                      @click="() => configureWidget(element.id)" class="config-button"
+                      :class="configWidget === element.id ? 'active-config' : ''">
+                      <!-- `cog-6-tooth` icon from https://heroicons.com/, MIT license -->
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                    <button @click="() => removeWidget(element.id)" class="config-button"
+                      :class="configWidget === element.id ? 'active-config' : ''">
+                      <!-- `x-mark` icon from https://heroicons.com/, MIT license -->
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </header>
+                <div v-if="configWidget === element.id" class="p-1">
+                  <DoricWidgetConfig :widgetId="element.id" @setSubscriptionMode="setSubscriptionMode" />
                 </div>
-              </header>
-              <div v-if="configWidget === element.id">
-                <DoricWidgetConfig :widgetId="element.id" @setWidgetOfInterest="setWidgetOfInterest" />
-              </div>
-              <div :class="{ 'hidden': configWidget === element.id }">
-                <div class="widget" v-if="element?.type in widgets && 'widget' in widgets[element.type]">
-                  <component :is="widgets[element.type].widget"
-                    :useDoricOutput="(param: string) => getUseDoricOutput(element.id, param)"
-                    :useDoricInput="(param: string, options: UseDoricInputOptions) => getUseDoricInput(element.id, param, options)" />
+                <!-- We use "hidden", because we want the component to stay in the DOM
+                whether or not it's visible -->
+                <div :class="{ 'hidden': configWidget === element.id }" class="p-1">
+                  <div class="widget" v-if="element?.type in widgets && 'widget' in widgets[element.type]">
+                    <component :is="widgets[element.type].widget"
+                      :useDoricOutput="(param: string) => getUseDoricOutput(element.id, param)"
+                      :useDoricInput="(param: string, options: UseDoricInputOptions) => getUseDoricInput(element.id, param, options)" />
+                  </div>
+                  <DoricMissingWidget :type="element?.type" v-else />
                 </div>
-                <DoricMissingWidget :type="element?.type" v-else />
               </div>
             </div>
           </template>
@@ -301,6 +367,7 @@ const getHeaderColor = (widgetId: WidgetId) => {
   height: 100%;
 
   .doric-widget-framework__widget {
+    position: relative;
 
     &.config-mode {
       border-color: rgb(37, 99, 235);
@@ -350,12 +417,50 @@ const getHeaderColor = (widgetId: WidgetId) => {
       }
     }
 
-    >div {
-      padding: 0.5rem;
-    }
-
     .hidden {
       display: none;
+    }
+  }
+
+  button.subscription-helper {
+    @apply absolute block left-0 top-0 w-full h-full m-0 flex flex-col items-center justify-center font-bold text-xl cursor-pointer z-10 rounded border-4;
+
+    &.subscribed {
+      // @apply bg-blue-200 border-blue-400 text-white
+      background-color: rgb(96, 165, 250, 0.8);
+      border-color: rgb(37, 99, 235);
+      color: white;
+
+      &:hover {
+        // @apply bg-blue-300 border-blue-500;
+        background-color: rgb(37, 99, 235, 0.8);
+        border-color: rgb(37, 99, 235);
+      }
+
+      &:active {
+        // @apply bg-blue-500 border-blue-600;
+        background-color: rgb(10, 132, 255, 0.8);
+        border-color: rgb(10, 132, 255);
+      }
+    }
+
+    &.not-subscribed {
+      /* bg-gray-200 border-gray-300 text-gray-800 */
+      background-color: rgb(229, 231, 235, 0.8);
+      border-color: rgb(209, 213, 219);
+      color: rgb(75, 85, 99);
+
+      &:hover {
+        /* bg-gray-300 border-gray-400 */
+        background-color: rgb(209, 213, 219, 0.8);
+        border-color: rgb(156, 163, 175);
+      }
+
+      &:active {
+        /* bg-gray-500 border-gray-600 */
+        background-color: rgb(107, 114, 128, 0.8);
+        border-color: rgb(75, 85, 99);
+      }
     }
   }
 

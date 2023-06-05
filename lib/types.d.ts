@@ -5,12 +5,15 @@ export type WidgetComponentMap = {
     }
 }
 
+export type SubscriptionState = "all" | "none" | "some"
+
 export type WidgetId = string
 
 export type MinimalInput = {
     value?: string
     shared?: boolean
     subscriptions: WidgetId[]
+    subscriptionState?: SubscriptionState
 }
 export type MinimalInputs = {
     [key: string]: MinimalInput
@@ -21,6 +24,7 @@ export type Inputs = {
         value: string
         shared: boolean
         subscriptions: WidgetId[]
+        subscriptionState: SubscriptionState
     }
 }
 

@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import type {
-  WidgetId
-} from '../types'
+import {
+  ref,
+} from 'vue'
 import {
   getWidget,
-  getWidgetIds,
 } from '../doric'
 
 const props = defineProps({
@@ -14,95 +13,96 @@ const props = defineProps({
   }
 })
 const emit = defineEmits([
-  'setWidgetOfInterest',
+  'setSubscriptionMode',
 ])
 
 const widget = getWidget(props.widgetId)
-const widgetIds = getWidgetIds()
-
-const isSubscribedTo = (key: string, widgetId: WidgetId) =>
-  widget.inputs[key].subscriptions.includes(widgetId)
-
-const toggleSubscription = (key: string, widgetId: WidgetId) => {
-  const checked = !isSubscribedTo(key, widgetId)
-
-  // Update the subscription's widgetSubscriptions
-  const newKeySubscriptions = [...widget.inputs[key].subscriptions]
-  if (checked) {
-    newKeySubscriptions.push(widgetId)
-  } else {
-    const index = newKeySubscriptions.indexOf(widgetId)
-    if (index > -1) {
-      newKeySubscriptions.splice(index, 1)
-    }
-  }
-  widget.inputs[key].subscriptions = [...newKeySubscriptions]
-}
-const subscribeToAll = (key: string) => {
-  const newKeySubscriptions = [...widgetIds]
-  widget.inputs[key].subscriptions = newKeySubscriptions
-}
 
 const toggleShared = (key: string) => {
   widget.inputs[key].shared = !widget.inputs[key].shared
 }
 
-const onMouseEnter = (widgetId: WidgetId) => {
-  emit("setWidgetOfInterest", widgetId)
+const subscriptionMode = ref("")
+const toggleSubscriptionMode = (inputKey: string) => {
+  if (subscriptionMode.value === inputKey) {
+    // null value unsets
+    emit("setSubscriptionMode")
+    subscriptionMode.value = ""
+  }
+  else {
+    emit("setSubscriptionMode", props.widgetId, inputKey)
+    subscriptionMode.value = inputKey
+  }
 }
-const onMouseLeave = () => {
-  emit("setWidgetOfInterest", "")
+const turnOffSubscriptionMode = () => {
+  emit("setSubscriptionMode")
+  subscriptionMode.value = ""
 }
 </script>
 
 <template>
-  <div>
+  <div class="p-2">
     <span class="title">
       Label:
     </span>
-    <input v-model="widget.label" />
+    <input type="text" v-model="widget.label" />
   </div>
   <div v-if="Object.keys(widget.inputs).length === 0">This widget does not declare any inputs.</div>
   <div v-else>
-    <span class="title">
-      Configure Inputs:
-    </span>
     <div>
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Key</th>
-              <th>Value</th>
-              <th>Subscriptions</th>
-              <th>Shared</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="key in Object.keys(widget.inputs)" :key="key">
-              <td>{{ key }}</td>
-              <td>
-                <input v-model="widget.inputs[key].value" />
-              </td>
-              <td>
-                <!-- use checkboxes instead of multi-select -->
-                <span v-for="widgetId in widgetIds" :key="widgetId" @mouseenter="onMouseEnter(widgetId)"
-                  @mouseleave="onMouseLeave">
-                  <input type="checkbox" :id="`${widgetId}.${key}`" class="multi-select"
-                    :checked="isSubscribedTo(key, widgetId)" @change="toggleSubscription(key, widgetId)" />
-                  <label :for="`${widgetId}.${key}`">
-                    {{ widgetId }}
-                  </label>
-                </span>
-                <button class="wildcard-subscription" v-show="widget.inputs[key].subscriptions.length === 0"
-                  title="Implicit subscription to all widgets" @click="subscribeToAll(key)">✱</button>
-              </td>
-              <td>
-                <input type="checkbox" :id="widgetId" :checked="widget.inputs[key].shared" @change="toggleShared(key)" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-for="key in Object.keys(widget.inputs)" :key="key" class="relative flex flex-col p-2 border-t-2">
+        <span class="font-bold text-blue-800 text-sm">
+          {{ key }}
+        </span>
+
+        <div class="table w-full">
+          <div class="table-row">
+            <div class="table-cell">Value:</div>
+            <div class="table-cell">
+              <input type="text" v-model="widget.inputs[key].value" />
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell">Subscriptions:</div>
+            <div class="table-cell">
+              <div class="flex flex-row">
+                <div class="flex justify-center items-center">
+                  <select v-model="widget.inputs[key].subscriptionState" @change="turnOffSubscriptionMode">
+                    <!-- options for SubscriptionState -->
+                    <option value="none">None</option>
+                    <option value="all">All</option>
+                    <option value="some">Some</option>
+                  </select>
+                </div>
+                <div class="flex justify-center items-center pl-1">
+                  <button v-show="widget.inputs[key].subscriptionState === 'some'" class="subscription-button"
+                    :class="{ active: subscriptionMode === key }" @click="toggleSubscriptionMode(key)">
+                    <!-- `viewfinder-circle` icon from https://heroicons.com/, MIT license -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                      stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell">Share:</div>
+            <div class="table-cell truncate">
+              <div class="flex flex-row justify-between shared-toggle">
+                <input class="checkbox hidden" type="checkbox" :id="widgetId" :checked="widget.inputs[key].shared"
+                  @change="toggleShared(key)" />
+                <label :for="widgetId" class="flex items-center p-1 cursor-pointer bg-gray-200 relative w-8 rounded-full">
+                  <div class="dot relative bg-white border border-gray-200 w-3 h-3 rounded-full transition">
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -126,27 +126,36 @@ table {
   }
 }
 
-input[type=checkbox].multi-select {
-  display: none;
+button.subscription-button {
+  // reset all styles
+  all: initial;
+  border: 1px solid black;
 
-  &+label {
-    font-size: x-small;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin: 2px;
-    padding: 0 5px;
-    display: inline-block;
-    cursor: pointer;
-    user-select: none;
+  @apply px-2 py-1 bg-gray-50 cursor-pointer text-sm font-medium text-gray-900 rounded border border-gray-200 select-none;
+
+  &:hover {
+    @apply bg-gray-100 text-blue-700;
+  }
+
+  &.active {
+    @apply bg-blue-100 text-blue-700;
 
     &:hover {
-      background-color: #eee;
+      @apply bg-blue-200;
     }
   }
+}
 
-  &:checked+label {
-    background-color: #c0e0ff;
-  }
+input[type="text"] {
+  @apply inline-block border border-gray-300 text-gray-900 text-sm rounded block py-1 px-2
+}
+
+.shared-toggle input:checked+label .dot {
+  transform: translateX(100%);
+}
+
+.shared-toggle input:checked+label {
+  @apply bg-blue-500 border-blue-300;
 }
 
 .wildcard-subscription {

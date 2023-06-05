@@ -77,8 +77,10 @@ const useDoricStore = defineStore('doric-workspace', {
       // All widgets with an input key subscribed to widgetId
       return state.columns.flat().filter(w =>
         key in w.inputs && (
-          w.inputs[key].subscriptions.includes(widgetId)
-          || w.inputs[key].subscriptions.length === 0 // Implicit subscription
+          w.inputs[key].subscriptionState === "all" || (
+            w.inputs[key].subscriptionState === "some" &&
+            w.inputs[key].subscriptions.includes(widgetId)
+          )
         )
       )
     },
@@ -108,6 +110,7 @@ const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
       value: "",
       shared: false,
       subscriptions: [],
+      subscriptionState: i[key]?.subscriptions?.length ? "some" : "all",
     }, i[key])
   })
   return validatedInputs as Inputs
@@ -305,6 +308,7 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
       value: "",
       shared: options?.shared || false,
       subscriptions: [],
+      subscriptionState: "all",
     }
   }
 
