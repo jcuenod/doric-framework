@@ -58,13 +58,13 @@ const turnOffSubscriptionMode = () => {
         <div class="table w-full">
           <div class="table-row">
             <div class="table-cell">Value:</div>
-            <div class="table-cell">
+            <div class="table-cell pb-1">
               <input type="text" v-model="widget.inputs[key].value" />
             </div>
           </div>
           <div class="table-row">
             <div class="table-cell">Subscriptions:</div>
-            <div class="table-cell">
+            <div class="table-cell pb-1">
               <div class="flex flex-row">
                 <div class="flex justify-center items-center">
                   <select v-model="widget.inputs[key].subscriptionState" @change="turnOffSubscriptionMode">
@@ -83,7 +83,6 @@ const turnOffSubscriptionMode = () => {
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-
                   </button>
                 </div>
               </div>
@@ -91,12 +90,12 @@ const turnOffSubscriptionMode = () => {
           </div>
           <div class="table-row">
             <div class="table-cell">Share:</div>
-            <div class="table-cell truncate">
+            <div class="table-cell pb-1 truncate">
               <div class="flex flex-row justify-between shared-toggle">
-                <input class="checkbox hidden" type="checkbox" :id="widgetId" :checked="widget.inputs[key].shared"
+                <input class="hidden" type="checkbox" :id="widgetId" :checked="widget.inputs[key].shared"
                   @change="toggleShared(key)" />
-                <label :for="widgetId" class="flex items-center p-1 cursor-pointer bg-gray-200 relative w-8 rounded-full">
-                  <div class="dot relative bg-white border border-gray-200 w-3 h-3 rounded-full transition">
+                <label :for="widgetId">
+                  <div class="dot">
                   </div>
                 </label>
               </div>
@@ -114,24 +113,15 @@ const turnOffSubscriptionMode = () => {
   margin-right: 1rem;
 }
 
-table {
-  width: 100%;
-
-  >thead {
-    background-color: #eee;
-  }
-
-  select {
-    width: 100%;
-  }
-}
-
 button.subscription-button {
   // reset all styles
   all: initial;
   border: 1px solid black;
+}
 
-  @apply px-2 py-1 bg-gray-50 cursor-pointer text-sm font-medium text-gray-900 rounded border border-gray-200 select-none;
+button.subscription-button,
+select {
+  @apply box-border h-8 px-2 bg-gray-50 cursor-pointer text-sm font-medium text-gray-900 rounded border border-gray-200 select-none;
 
   &:hover {
     @apply bg-gray-100 text-blue-700;
@@ -147,27 +137,32 @@ button.subscription-button {
 }
 
 input[type="text"] {
-  @apply inline-block border border-gray-300 text-gray-900 text-sm rounded block py-1 px-2
+  @apply inline-block w-full border border-gray-300 text-gray-900 text-sm rounded block py-1 px-2
 }
 
-.shared-toggle input:checked+label .dot {
-  transform: translateX(100%);
-}
+.shared-toggle input {
+  &+label {
+    @apply flex items-center p-1 cursor-pointer bg-gray-300 relative w-8 rounded-full;
 
-.shared-toggle input:checked+label {
-  @apply bg-blue-500 border-blue-300;
-}
+    &:hover {
+      @apply bg-gray-200;
+    }
 
-.wildcard-subscription {
-  background: transparent;
-  border: none;
-  font-size: x-small;
-  font-weight: bold;
-  padding: 0 2px;
-  cursor: pointer;
+    .dot {
+      @apply relative bg-white border border-gray-200 w-3 h-3 rounded-full transition;
+    }
+  }
 
-  &:hover {
-    color: #eee;
+  &:checked+label {
+    @apply bg-blue-500 border-blue-300;
+
+    &:hover {
+      @apply bg-blue-400;
+    }
+
+    .dot {
+      transform: translateX(100%);
+    }
   }
 }
 </style>
