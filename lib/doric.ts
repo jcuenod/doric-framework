@@ -76,6 +76,7 @@ const useDoricStore = defineStore('doric-workspace', {
     getSubscribers: (state) => (widgetId: string, key: string) => {
       // All widgets with an input key subscribed to widgetId
       return state.columns.flat().filter(w =>
+        w.id !== widgetId &&
         key in w.inputs && (
           w.inputs[key].subscriptionState === "all" || (
             w.inputs[key].subscriptionState === "some" &&
