@@ -1,6 +1,6 @@
 {
   "name": "doric-framework",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "A column-based widget UI framework for Vue 3",
   "keywords": [
     "doric",
