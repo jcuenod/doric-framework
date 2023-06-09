@@ -41,7 +41,7 @@ const turnOffSubscriptionMode = () => {
 </script>
 
 <template>
-  <div class="p-2">
+  <div class="p-2 flex flex-row items-center">
     <span class="title">
       Label:
     </span>
@@ -57,13 +57,13 @@ const turnOffSubscriptionMode = () => {
 
         <div class="table w-full">
           <div class="table-row">
-            <div class="table-cell">Value:</div>
+            <div class="table-cell pb-1 pr-2">Value:</div>
             <div class="table-cell pb-1">
               <input type="text" v-model="widget.inputs[key].value" />
             </div>
           </div>
           <div class="table-row">
-            <div class="table-cell">Subscriptions:</div>
+            <div class="table-cell pb-1 pr-2">Subscriptions:</div>
             <div class="table-cell pb-1">
               <div class="flex flex-row">
                 <div class="flex justify-center items-center">
@@ -89,7 +89,7 @@ const turnOffSubscriptionMode = () => {
             </div>
           </div>
           <div class="table-row">
-            <div class="table-cell">Share:</div>
+            <div class="table-cell pb-1 pr-2">Share:</div>
             <div class="table-cell pb-1 truncate">
               <div class="flex flex-row justify-between shared-toggle">
                 <input class="hidden" type="checkbox" :id="widgetId" :checked="widget.inputs[key].shared"
@@ -116,22 +116,30 @@ const turnOffSubscriptionMode = () => {
 button.subscription-button {
   // reset all styles
   all: initial;
-  border: 1px solid black;
 }
 
 button.subscription-button,
 select {
+  border: 1px solid black;
   @apply box-border h-8 px-2 bg-gray-50 cursor-pointer text-sm font-medium text-gray-900 rounded border border-gray-200 select-none;
 
   &:hover {
-    @apply bg-gray-100 text-blue-700;
+    @apply bg-gray-100 text-blue-700 border-gray-300;
+  }
+
+  &:active {
+    @apply bg-gray-200 border-blue-400;
+  }
+
+  &:focus {
+    @apply border-blue-400;
   }
 
   &.active {
-    @apply bg-blue-100 text-blue-700;
+    @apply bg-blue-100 text-blue-700 border-blue-300;
 
     &:hover {
-      @apply bg-blue-200;
+      @apply bg-blue-200 border-blue-400;
     }
   }
 }
