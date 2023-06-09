@@ -41,16 +41,10 @@ const turnOffSubscriptionMode = () => {
 </script>
 
 <template>
-  <div class="p-2 flex flex-row items-center">
-    <span class="title">
-      Label:
-    </span>
-    <input type="text" v-model="widget.label" />
-  </div>
   <div v-if="Object.keys(widget.inputs).length === 0">This widget does not declare any inputs.</div>
   <div v-else>
     <div>
-      <div v-for="key in Object.keys(widget.inputs)" :key="key" class="relative flex flex-col p-2 border-t-2">
+      <div v-for="(key, index) in Object.keys(widget.inputs)" :key="key" class="relative flex flex-col p-2" :class="{'border-t-2': index > 0}">
         <span class="font-bold text-blue-800 text-sm">
           {{ key }}
         </span>

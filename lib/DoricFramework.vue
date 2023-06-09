@@ -262,7 +262,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
       </template>
     </draggable>
     <splitpanes>
-      <pane min-size="20" v-for="(column, index) in     getWorkspaceShape()    " :key="index"
+      <pane min-size="20" v-for="(column, index) in getWorkspaceShape()" :key="index"
         :size="100 / getWorkspaceShape().length">
 
         <draggable class="list-group" :list="column" group="widgets" @change="handleRearrange(index, $event)" itemKey="id"
@@ -280,10 +280,13 @@ const toggleSubscription = (widgetId: WidgetId) => {
               </button>
               <div class="doric-widget-framework__widget border-2 rounded group" :class="getBorderColor(element.id)">
                 <header class="drag-handle p-1" :class="getHeaderColor(element.id)">
-                  <div class="text-gray-900 text-sm font-bold ml-2">
-                    {{ !configWidget ? element.label : element.id }}
+                  <div class="flex-1 flex flex-row items-center">
+                    <span class="text-gray-900 text-sm font-bold mx-2">
+                      {{ configWidget !== element.id ? element.label : "Label:" }}
+                    </span>
+                    <input v-if="configWidget === element.id" type="text" v-model="getWidget(element.id).label" class="w-full mr-2" />
                   </div>
-                  <div :class="{ invisible: configWidget && configWidget !== element.id }">
+                  <div :class="{ invisible: configWidget && configWidget !== element.id }" class="flex flex-row items-center">
                     <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
                       @click="() => configureWidget(element.id)" class="config-button"
                       :class="configWidget === element.id ? 'active-config' : ''">
