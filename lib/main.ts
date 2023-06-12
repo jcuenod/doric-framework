@@ -4,5 +4,5 @@ import "./index.css"
 
 export {
     DoricFramework,
-    exportWorkspace
+    exportWorkspace,
 }
