@@ -12,7 +12,7 @@ export type WidgetId = string
 export type MinimalInput = {
     value?: string
     shared?: boolean
-    subscriptions: WidgetId[]
+    subscriptions?: WidgetId[]
     subscriptionState?: SubscriptionState
 }
 export type MinimalInputs = {

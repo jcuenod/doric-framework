@@ -1,9 +1,11 @@
 import type {
+  MinimalInput,
   Widget,
   MinimalWidget,
   WidgetInputState,
   MinimalInputs,
   Inputs,
+  MinimalWorkspace,
   Workspace,
   DefaultLabels,
   UseDoricInputOptions,
@@ -330,6 +332,49 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
 }
 
 
+// WORKSPACE EXPORT -------------------------------------------------------------------------------
+
+const exportWorkspace = () => {
+  const store = useDoricStore()
+  // Deep clone the workspace using stringification trick
+  const workspace: MinimalWorkspace = JSON.parse(JSON.stringify(store.columns))
+
+  // Reduce inputs in workspace to only the necessary information:
+  // - input.value is only included if not empty (falsy)
+  // - input.subscriptions is only included if state is "some"
+  // - input.shared is only included if true (not falsy)
+  workspace.forEach((column, columnIndex) => {
+    column.forEach((widget, widgetIndex) => {
+      if (widget.inputs && Object.keys(widget.inputs).length > 0) {
+        const inputs = widget.inputs as MinimalInputs
+        Object.keys(inputs).forEach(inputKey => {
+          const newInput: MinimalInput = {}
+          
+          if (inputs[inputKey].value) {
+            newInput["value"] = inputs[inputKey].value
+          }
+
+          if (inputs[inputKey].shared) {
+            newInput["shared"] = true
+          }
+
+          if (inputs[inputKey].subscriptionState === "all" || inputs[inputKey].subscriptionState === "none") {
+            newInput["subscriptionState"] = inputs[inputKey].subscriptionState
+          }
+          else {
+            newInput["subscriptionState"] = "some"
+            newInput["subscriptions"] = inputs[inputKey].subscriptions
+          }
+          
+          (workspace[columnIndex][widgetIndex].inputs as MinimalInputs)[inputKey] = newInput
+        })
+      }
+    })
+  })
+  return workspace
+}
+
+
 // EXPORTS ---------------------------------------------------------------------------------------
 
 export {
@@ -347,4 +392,5 @@ export {
   injectWorkspaceState,
   sharedParameters,
   setDefaultLabels,
+  exportWorkspace,
 }
