@@ -27,6 +27,11 @@ import {
 
 // defineProps for vue and typescript
 const props = defineProps({
+  locked: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   widgets: {
     type: Object,
     required: true,
@@ -171,6 +176,11 @@ const createColumnForWidget = (first: boolean, event: any[]) => {
 defineComponent({
   name: 'DoricFramework',
   props: {
+    locked: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     widgets: {
       type: Object,
       required: true,
@@ -210,6 +220,9 @@ const getBorderColor = (widgetId: WidgetId) => {
     : "border-gray-200 hover:border-gray-300"
 }
 const getHeaderColor = (widgetId: WidgetId) => {
+  if (props.locked) {
+    return "bg-gray-100"
+  }
   return configWidget.value === widgetId
     ? "bg-blue-200 group-hover:bg-blue-300"
     : "bg-gray-100 group-hover:bg-gray-200"
@@ -279,14 +292,16 @@ const toggleSubscription = (widgetId: WidgetId) => {
                 </div>
               </button>
               <div class="doric-widget-framework__widget border-2 rounded group" :class="getBorderColor(element.id)">
-                <header class="drag-handle p-1" :class="getHeaderColor(element.id)">
+                <header class="p-1" :class="getHeaderColor(element.id) + (locked ? '' : ' drag-handle')">
                   <div class="flex-1 flex flex-row items-center">
-                    <span class="text-gray-900 text-sm font-bold mx-2">
+                    <span class="text-gray-900 text-sm font-bold mx-2 my-1">
                       {{ configWidget !== element.id ? element.label : "Label:" }}
                     </span>
-                    <input v-if="configWidget === element.id" type="text" v-model="getWidget(element.id).label" class="w-full mr-2" />
+                    <input v-if="configWidget === element.id" type="text" v-model="getWidget(element.id).label"
+                      class="w-full mr-2" />
                   </div>
-                  <div :class="{ invisible: configWidget && configWidget !== element.id }" class="flex flex-row items-center">
+                  <div v-if="!locked" :class="{ invisible: configWidget && configWidget !== element.id }"
+                    class="flex flex-row items-center">
                     <button v-if="element?.type in widgets && 'widget' in widgets[element.type]"
                       @click="() => configureWidget(element.id)" class="config-button"
                       :class="configWidget === element.id ? 'active-config' : ''">
@@ -326,7 +341,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
           </template>
         </draggable>
 
-        <div class="column-buttons">
+        <div v-if="!locked" class="column-buttons">
           <div class="center">
             <button v-if="column.length === 0" @click="() => removeColumn(index)">
               Remove Column
@@ -351,12 +366,12 @@ const toggleSubscription = (widgetId: WidgetId) => {
         </div>
       </pane>
     </splitpanes>
-    <draggable class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(false, $event)" itemKey="id">
+    <draggable v-if="!locked" class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(false, $event)" itemKey="id">
       <template #item="_">
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>
     </draggable>
-    <div class="column-insert"><button @click="insertColumn(getWorkspaceShape().length)">+</button></div>
+    <div v-if="!locked" class="column-insert"><button @click="insertColumn(getWorkspaceShape().length)">+</button></div>
   </div>
 </template>
 
