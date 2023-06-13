@@ -13,8 +13,8 @@ import {
   getUseDoricOutput,
   getWorkspaceShape,
   setWorkspace,
-  insertColumn,
-  removeColumn,
+  insertColumn as insertDoricColumn,
+  removeColumn as removeDoricColumn,
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
   moveWidget as moveDoricWidget,
@@ -63,18 +63,22 @@ const subscriptionMode = ref({
   input: "",
 })
 
-const pushWorkspace = (newWorkspace: unknown) => {
-  if (!newWorkspace) {
-    console.warn("newWorkspace is null")
-    return false
-  }
-  loadingWorkspace.value = true
+const turnOffConfigMode = () => {
   configWidget.value = ""
   subscriptionMode.value = {
     widgetId: "",
     input: "",
   }
   showWidgetsToAddColumn.value = -1
+}
+
+const pushWorkspace = (newWorkspace: unknown) => {
+  if (!newWorkspace) {
+    console.warn("newWorkspace is null")
+    return false
+  }
+  loadingWorkspace.value = true
+  turnOffConfigMode()
   setWorkspace(newWorkspace).then(() => {
     loadingWorkspace.value = false
   })
@@ -102,37 +106,34 @@ watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
   emit("setSharedParameters", newSharedParameters, oldSharedParameters)
 })
 
+watch(() => props.widgets, (newWidgets) => {
+  setDefaultLabels(Object.fromEntries(Object.keys(newWidgets).map(key => [key, newWidgets[key].defaultLabel])))
+})
+
+watch(() => props.locked, (newLocked) => {
+  if (newLocked) {
+    turnOffConfigMode()
+  }
+})
+
 const configureWidget = (widgetId: WidgetId) => {
-  if (configWidget.value === widgetId) {
-    configWidget.value = ""
-    subscriptionMode.value = {
-      widgetId: "",
-      input: "",
-    }
+  const currentConfigWidget = configWidget.value
+  turnOffConfigMode()
+  if (currentConfigWidget === widgetId) {
     return
   }
-  showWidgetsToAddColumn.value = -1
   configWidget.value = widgetId
 }
 
 const removeWidget = (widgetId: WidgetId) => {
-  configWidget.value = ""
-  subscriptionMode.value = {
-    widgetId: "",
-    input: "",
-  }
+  turnOffConfigMode()
   removeDoricWidget(widgetId)
 }
 
 const setColumnToAddWidget = (column: number) => {
+  turnOffConfigMode()
   if (showWidgetsToAddColumn.value === column) {
-    showWidgetsToAddColumn.value = -1
     return
-  }
-  configWidget.value = ""
-  subscriptionMode.value = {
-    widgetId: "",
-    input: "",
   }
   showWidgetsToAddColumn.value = column
 }
@@ -162,9 +163,17 @@ const handleRearrange = (colIndex: number, event: any[]) => {
   })
 }
 
+const addColumn = (index: number) => {
+  insertDoricColumn(index)
+}
+
+const removeColumn = (index: number) => {
+  removeDoricColumn(index)
+}
+
 const createColumnForWidget = (first: boolean, event: any[]) => {
   const colIndex = first ? 0 : getWorkspaceShape().length
-  insertColumn(colIndex)
+  insertDoricColumn(colIndex)
   Object.entries(event).forEach(([method, details]) => {
     const widgetId = details.element.id
     if (method === "added") {
@@ -372,7 +381,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>
     </draggable>
-    <div v-if="!locked" class="column-insert"><button @click="insertColumn(getWorkspaceShape().length)">+</button></div>
+    <div v-if="!locked" class="column-insert"><button @click="addColumn(getWorkspaceShape().length)">+</button></div>
   </div>
 </template>
 
