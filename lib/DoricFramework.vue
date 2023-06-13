@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type {
-  Workspace,
   WidgetInputState,
   UseDoricInputOptions,
   WidgetId,
@@ -64,9 +63,10 @@ const subscriptionMode = ref({
   input: "",
 })
 
-const pushWorkspace = (newWorkspace: Workspace) => {
+const pushWorkspace = (newWorkspace: unknown) => {
   if (!newWorkspace) {
-    return
+    console.warn("newWorkspace is null")
+    return false
   }
   loadingWorkspace.value = true
   configWidget.value = ""
@@ -79,8 +79,8 @@ const pushWorkspace = (newWorkspace: Workspace) => {
     loadingWorkspace.value = false
   })
 }
-watch(() => props.workspace as Workspace, pushWorkspace)
-pushWorkspace(props.workspace as Workspace)
+watch(() => props.workspace, pushWorkspace)
+pushWorkspace(props.workspace)
 
 const pushState = (newInitialState: WidgetInputState[]) => {
   if (!newInitialState) {
@@ -366,7 +366,8 @@ const toggleSubscription = (widgetId: WidgetId) => {
         </div>
       </pane>
     </splitpanes>
-    <draggable v-if="!locked" class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(false, $event)" itemKey="id">
+    <draggable v-if="!locked" class="list-group" :list="[]" group="widgets" @change="createColumnForWidget(false, $event)"
+      itemKey="id">
       <template #item="_">
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>

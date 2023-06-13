@@ -101,7 +101,7 @@ const useDoricStore = defineStore('doric-workspace', {
 
 // VALIDATION -------------------------------------------------------------------------------------
 
-const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
+const getValidatedInputs: (i: any) => Inputs = (i) => {
   if (!i) {
     return {}
   }
@@ -116,21 +116,22 @@ const getValidatedInputs: (i: MinimalInputs) => Inputs = (i) => {
       subscriptionState: i[key]?.subscriptions?.length ? "some" : "all",
     }, i[key])
   })
-  return validatedInputs as Inputs
+  return validatedInputs
 }
 
-const getValidatedWidget: (w: MinimalWidget) => Widget = (w) => {
+const getValidatedWidget: (w: any) => Widget = (w) => {
   // Note: We don't check that the widget type exists, we handle that case in the display
-  if (!w.type || typeof w.type !== "string") {
-    throw new Error(`Widget ${w} is missing a type or the type is invalid: ${w.type}`)
+  if (!("type" in w) || typeof w.type !== "string") {
+    console.error("Widget is missing a type or the type is not a string:\n", w)
+    throw new Error(`Widget is missing a type or the type is not a string`)
   }
 
   return {
     type: w.type,
-    id: w.id || "",
-    label: w.label || (w.type in defaultLabels ? defaultLabels[w.type] : w.type),
-    inputs: getValidatedInputs(w.inputs || {}),
-  } as Widget
+    id: w?.id || "",
+    label: w?.label || (w.type in defaultLabels ? defaultLabels[w.type] : w.type),
+    inputs: getValidatedInputs(w?.inputs || {}),
+  }
 }
 
 const widgetWithUniqueId: (
@@ -163,13 +164,26 @@ const getWorkspaceShape = () => {
   return store.workspaceShape
 }
 
-const setWorkspace = (newColumns: Workspace) => new Promise<void>((resolve) => {
+const setWorkspace = (newWorkspace: unknown) => new Promise<void>((resolve, reject) => {
   const store = useDoricStore()
 
   // First check that every widget has "subscriptions" and "inputs" fields
   const validatedWidgetIds: string[] = []
-  const validatedNewColumns = newColumns.map(c =>
-    c.map(widget => {
+
+  if (!Array.isArray(newWorkspace)) {
+    reject("Workspace is not an array")
+    return
+  }
+  if (!newWorkspace.every(column => Array.isArray(column))) {
+    reject("Workspace is not an array of arrays")
+    return
+  }
+  if (!newWorkspace.flat().every(widget => typeof widget === "object")) {
+    reject("Widgets in new Workspace are not all objects")
+    return
+  }
+  const validatedNewColumns = newWorkspace.map(c =>
+    c.map((widget: object) => {
       const validatedWidget = getValidatedWidget(widget)
       const validatedUniqueWidget = widgetWithUniqueId(validatedWidget, validatedWidgetIds)
       validatedWidgetIds.push(validatedUniqueWidget.id)
@@ -334,7 +348,7 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
 
 // WORKSPACE EXPORT -------------------------------------------------------------------------------
 
-const exportWorkspace = () => {
+const exportWorkspace: () => MinimalWorkspace = () => {
   const store = useDoricStore()
   // Deep clone the workspace using stringification trick
   const workspace: MinimalWorkspace = JSON.parse(JSON.stringify(store.columns))
@@ -349,7 +363,7 @@ const exportWorkspace = () => {
         const inputs = widget.inputs as MinimalInputs
         Object.keys(inputs).forEach(inputKey => {
           const newInput: MinimalInput = {}
-          
+
           if (inputs[inputKey].value) {
             newInput["value"] = inputs[inputKey].value
           }
@@ -365,7 +379,7 @@ const exportWorkspace = () => {
             newInput["subscriptionState"] = "some"
             newInput["subscriptions"] = inputs[inputKey].subscriptions
           }
-          
+
           (workspace[columnIndex][widgetIndex].inputs as MinimalInputs)[inputKey] = newInput
         })
       }
