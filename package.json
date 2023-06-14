@@ -24,8 +24,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/doric-framework.js",
-      "require": "./dist/doric-framework.umd.cjs"
+      "import": {
+        "default": "./dist/doric-framework.js",
+        "types": "./dist/types/main.d.ts"
+      },
+      "require": {
+        "default": "./dist/doric-framework.umd.cjs",
+        "types": "./dist/types/main.d.ts"
+      }
     },
     "./dist/style.css": "./dist/style.css"
   },
