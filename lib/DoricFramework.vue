@@ -3,8 +3,10 @@ import type {
   WidgetInputState,
   UseDoricInputOptions,
   WidgetId,
+  Workspace,
+  WidgetComponentMap,
 } from './types'
-import { defineComponent, nextTick, ref, watch } from 'vue'
+import { defineComponent, nextTick, ref, watch, PropType } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import draggable from "vuedraggable"
@@ -32,19 +34,19 @@ const props = defineProps({
     default: false,
   },
   widgets: {
-    type: Object,
+    type: Object as PropType<WidgetComponentMap>,
     required: true,
     default: () => ({}),
   },
   workspace: {
-    type: Object,
+    type: Object as PropType<Workspace>,
     required: true,
     default: () => ([[]]),
   },
   initialState: {
-    type: Object,
+    type: Array as PropType<WidgetInputState[]>,
     required: false,
-    default: () => ({}),
+    default: () => ([]),
   },
 })
 
@@ -140,10 +142,10 @@ const setColumnToAddWidget = (column: number) => {
 
 const addWidget = (widgetType: keyof typeof props.widgets, column: number) => {
   addDoricWidget({
-    id: widgetType.replace("-widget", "-0"),
-    type: widgetType,
+    id: `${widgetType}-0`,
+    type: `${widgetType}`,
   }, column)
-  showWidgetsToAddColumn.value = -1
+  turnOffConfigMode()
 }
 
 
@@ -191,19 +193,19 @@ defineComponent({
       default: false,
     },
     widgets: {
-      type: Object,
+      type: Object as PropType<WidgetComponentMap>,
       required: true,
       default: () => ({}),
     },
     workspace: {
-      type: Object,
+      type: Object as PropType<Workspace>,
       required: true,
-      default: () => ([[]]),
+      default: () => ([]),
     },
     initialState: {
-      type: Object,
+      type: Array as PropType<WidgetInputState[]>,
       required: false,
-      default: () => ({}),
+      default: () => ([]),
     },
   },
   emits: ['setSharedParameters'],
@@ -366,7 +368,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
               </button>
             </div>
             <div class="add-widget-list" :class="{ invisible: showWidgetsToAddColumn !== index }">
-              <button v-for="(    widgetType    ) in     Object.keys(widgets)    " :key="widgetType"
+              <button v-for="(widgetType) in Object.keys(widgets)" :key="widgetType"
                 @click="() => addWidget(widgetType, index)">
                 {{ widgets[widgetType].defaultLabel }}
               </button>

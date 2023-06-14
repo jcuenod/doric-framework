@@ -1,7 +1,9 @@
+import type { Component } from "vue"
+
 export type WidgetComponentMap = {
     [widgetKey: string]: {
         defaultLabel: string,
-        widget: Function,
+        widget: Component
     }
 }
 
@@ -9,47 +11,49 @@ export type SubscriptionState = "all" | "none" | "some"
 
 export type WidgetId = string
 
-export type MinimalInput = {
+export type Input = {
     value?: string
     shared?: boolean
     subscriptions?: WidgetId[]
     subscriptionState?: SubscriptionState
 }
-export type MinimalInputs = {
-    [key: string]: MinimalInput
-}
-
 export type Inputs = {
-    [key: string]: {
-        value: string
-        shared: boolean
-        subscriptions: WidgetId[]
-        subscriptionState: SubscriptionState
-    }
+    [key: string]: Input
 }
 
-export type MinimalWidget = {
+export type ValidatedInput = {
+    value: string
+    shared: boolean
+    subscriptions: WidgetId[]
+    subscriptionState: SubscriptionState
+}
+
+export type ValidatedInputs = {
+    [key: string]: ValidatedInput
+}
+
+export type Widget = {
     type: string
     id?: WidgetId
     label?: string
-    inputs?: MinimalInputs
+    inputs?: Inputs
 }
 
 export type WidgetWithInputs = {
     type: string
-    inputs: MinimalInputs
+    inputs: Inputs
 }
 
-export type Widget = {
+export type ValidatedWidget = {
     id: WidgetId
     type: string
     label: string
-    inputs: Inputs
+    inputs: ValidatedInputs
 }
 
 export type Workspace = Widget[][]
 
-export type MinimalWorkspace = MinimalWidget[][]
+export type ValidatedWorkspace = ValidatedWidget[][]
 
 export type SharedParameters = {
     widgetId: string

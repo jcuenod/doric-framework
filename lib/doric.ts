@@ -1,12 +1,12 @@
 import type {
-  MinimalInput,
+  Input,
+  ValidatedWidget,
   Widget,
-  MinimalWidget,
   WidgetInputState,
-  MinimalInputs,
   Inputs,
-  MinimalWorkspace,
+  ValidatedInputs,
   Workspace,
+  ValidatedWorkspace,
   DefaultLabels,
   UseDoricInputOptions,
 } from "./types"
@@ -25,7 +25,7 @@ const setDefaultLabels = (labels: DefaultLabels) => {
 const useDoricStore = defineStore('doric-workspace', {
   state: () => {
     return {
-      columns: [] as Workspace,
+      columns: [] as ValidatedWorkspace,
     }
   },
   actions: {
@@ -38,7 +38,7 @@ const useDoricStore = defineStore('doric-workspace', {
       })
       this.columns = [...this.columns.slice(0, columnIndex), ...this.columns.slice(columnIndex + 1)]
     },
-    addWidget(widget: MinimalWidget, column: number) {
+    addWidget(widget: Widget, column: number) {
       // Add widget to workspace
       const validatedWidget = getValidatedWidget(widget)
       const validatedUniqueWidget = widgetWithUniqueId(validatedWidget, this.widgetIds)
@@ -101,12 +101,12 @@ const useDoricStore = defineStore('doric-workspace', {
 
 // VALIDATION -------------------------------------------------------------------------------------
 
-const getValidatedInputs: (i: any) => Inputs = (i) => {
+const getValidatedInputs: (i: any) => ValidatedInputs = (i) => {
   if (!i) {
     return {}
   }
 
-  const validatedInputs: Inputs = {}
+  const validatedInputs: ValidatedInputs = {}
   // Ensure that inputs have a value, shared, and subscriptions field, create them if not
   Object.keys(i).forEach(key => {
     validatedInputs[key] = Object.assign({
@@ -119,7 +119,7 @@ const getValidatedInputs: (i: any) => Inputs = (i) => {
   return validatedInputs
 }
 
-const getValidatedWidget: (w: any) => Widget = (w) => {
+const getValidatedWidget: (w: any) => ValidatedWidget = (w) => {
   // Note: We don't check that the widget type exists, we handle that case in the display
   if (!("type" in w) || typeof w.type !== "string") {
     console.error("Widget is missing a type or the type is not a string:\n", w)
@@ -135,9 +135,9 @@ const getValidatedWidget: (w: any) => Widget = (w) => {
 }
 
 const widgetWithUniqueId: (
-  w: Widget,
+  w: ValidatedWidget,
   widgetIds: string[]
-) => Widget = (w: Widget, widgetIds: string[]) => {
+) => ValidatedWidget = (w: ValidatedWidget, widgetIds: string[]) => {
   if (!w.id || widgetIds.includes(w.id)) {
     const newW = { ...w }
     // Get lowest available id
@@ -226,7 +226,7 @@ const getWidgetIds = () => {
   return store.widgetIds
 }
 
-const addWidget = (widget: MinimalWidget, column: number) => {
+const addWidget = (widget: Widget, column: number) => {
   const store = useDoricStore()
   store.addWidget(widget, column)
 }
@@ -348,10 +348,10 @@ const getUseDoricInput = (widgetId: string, key: string, options: UseDoricInputO
 
 // WORKSPACE EXPORT -------------------------------------------------------------------------------
 
-const exportWorkspace: () => MinimalWorkspace = () => {
+const exportWorkspace: () => Workspace = () => {
   const store = useDoricStore()
   // Deep clone the workspace using stringification trick
-  const workspace: MinimalWorkspace = JSON.parse(JSON.stringify(store.columns))
+  const workspace: Workspace = JSON.parse(JSON.stringify(store.columns))
 
   // Reduce inputs in workspace to only the necessary information:
   // - input.value is only included if not empty (falsy)
@@ -360,9 +360,9 @@ const exportWorkspace: () => MinimalWorkspace = () => {
   workspace.forEach((column, columnIndex) => {
     column.forEach((widget, widgetIndex) => {
       if (widget.inputs && Object.keys(widget.inputs).length > 0) {
-        const inputs = widget.inputs as MinimalInputs
+        const inputs = widget.inputs as Inputs
         Object.keys(inputs).forEach(inputKey => {
-          const newInput: MinimalInput = {}
+          const newInput: Input = {}
 
           if (inputs[inputKey].value) {
             newInput["value"] = inputs[inputKey].value
@@ -380,7 +380,7 @@ const exportWorkspace: () => MinimalWorkspace = () => {
             newInput["subscriptions"] = inputs[inputKey].subscriptions
           }
 
-          (workspace[columnIndex][widgetIndex].inputs as MinimalInputs)[inputKey] = newInput
+          (workspace[columnIndex][widgetIndex].inputs as Inputs)[inputKey] = newInput
         })
       }
     })
