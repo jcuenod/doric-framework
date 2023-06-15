@@ -201,13 +201,13 @@ The DoricFramework component accepts the following props:
 | --- | --- | --- |
 | `widgets` | `WidgetComponentMap` | A map of widget types to default labels and widget components (see example above). |
 | `workspace` | `Workspace` | A list of columns, each of which is a list of widgets. A minimal Widget is an object that includes a type, which is a key in the `WidgetComponentMap`. |
-| `initialState` | `WidgetInputState` | The initial state of the Doric workspace. An array to populate input values `{ widgetId: string, key: string, value: any }`. This is useful for hydrating state from localstorage, an API, or the URL. |
+| `initialState` | `WidgetInputState` | An array to populate input values of the workspace with elements in the form: `{ widgetId: string, key: string, value: any }`. This is useful for hydrating state from localstorage, an API, or the URL. Widget inputs may be defined in workspaces as well. This field is useful for user/session specific values. |
 | `locked` | `boolean` | Whether the workspace is locked. |
 | `setSharedParams` | `Function` | A callback function that is fired whenever a widget's input value changes and it is marked as `shared`. |
 
 ### Exporting the Current Workspace
 
-The `doric-framework` package also provides the `exportWorkspace` function. This function serializes the current workspace into a minimal `Workspace`. That is, a `Widget[][]` including the position of widgets in columns as well as their non-falsy input values, subscription, sharing states. Thus, the return type of `exportWorkspace` may be passed into `<DoricFramework />` as the `workspace` prop. This allows workspace state to be restored across sessions.
+The `doric-framework` package also provides the `exportWorkspace` function. This function serializes the current workspace into a minimal `Workspace`—i.e., a `Widget[][]` that includes the position of widgets in columns as well as their non-falsy input values, subscription, sharing states. Thus, the return type of `exportWorkspace` may be passed into `<DoricFramework />` as the `workspace` prop. This allows workspace state to be restored across sessions.
 
 It may be imported alongside the `DoricFramework` component as follows:
 
