@@ -207,7 +207,7 @@ The DoricFramework component accepts the following props:
 
 ### Exporting the Current Workspace
 
-The `doric-framework` package also provides the `exportWorkspace` function. This function serializes the current workspace into a minimal `Workspace`. That is, a `Widget[][]` including the position of widgets in columns as well as their non-falsy input values, subscription, sharing states.
+The `doric-framework` package also provides the `exportWorkspace` function. This function serializes the current workspace into a minimal `Workspace`. That is, a `Widget[][]` including the position of widgets in columns as well as their non-falsy input values, subscription, sharing states. Thus, the return type of `exportWorkspace` may be passed into `<DoricFramework />` as the `workspace` prop. This allows workspace state to be restored across sessions.
 
 It may be imported alongside the `DoricFramework` component as follows:
 
