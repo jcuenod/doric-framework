@@ -12,6 +12,9 @@
     - [Basic Usage](#basic-usage)
     - [Writing Widgets](#writing-widgets)
     - [Passing Widgets to Doric](#passing-widgets-to-doric)
+    - [Advanced](#advanced-usage)
+        - [Doric Framework Props](#doric-framework-props)
+        - [Exporting the Current Workspace](#exporting-the-current-workspace)
 - [License](#license)
 
 # About the Project
@@ -28,6 +31,18 @@ Doric Framework is a column-based widget UI framework for Vue 3. It displays cus
 - [pinia](https://pinia.esm.dev/)
 - [splitpanes](https://github.com/antoniandre/splitpanes)
 - [vuedraggable](https://github.com/SortableJS/vue.draggable.next/)
+
+Note that the `pinia` dependeny implies that you have mounted an app that uses `pinia` before using Doric. For example:
+
+```ts
+// main.ts
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+
+const pinia = createPinia()
+createApp(App).use(pinia).mount('#app')
+```
 
 <p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
@@ -48,17 +63,21 @@ npm install --save doric-framework
 
 ```vue
 <script setup lang="ts">
+// Required imports for Doric
 import { DoricFramework } from 'doric-framework'
 import "doric-framework/dist/style.css"
-import widgets from "@/components/doric-widgets/Widgets"
+
+// Import a map of your widgets from index.ts at this path
+import widgets from "@/components/doric-widgets/"
+
 const workspace = [
   [{
-    type: "passage-ref-widget",
+    type: "passage-ref",
   }, {
-    type: "dictionary-widget",
+    type: "dictionary",
   }],
   [{
-    type: "text-display-widget",
+    type: "text-display",
   }]
 ]
 </script>
@@ -114,11 +133,12 @@ export default {
     props: ['useDoricOutput', 'useDoricInput'],
     data() {
         return {
+            // Define input methods
             osisRef: this.useDoricInput("osisRef");
         }
     },
     created() {
-        // Define input methods
+        // Define output methods
         this.setOsisRef = this.useDoricOutput("osisRef");
     },
 }
@@ -135,7 +155,7 @@ export default {
 Doric expects a list of widgets to be passed to it. This list is a map of widget types to default labels and widget components. It is typical to import all the widgets in a single file and pass them to Doric.
 
 ```ts
-// Widgets.ts
+// /src/components/doric-widgets/index.ts
 import MyFirstWidget from "@/components/doric-widgets/MyFirstWidget.vue";
 import MySecondWidget from "@/components/doric-widgets/MySecondWidget.vue";
 
@@ -157,13 +177,45 @@ These widgets can then be passed to Doric as follows:
 <!-- App.vue -->
 <script> 
 import { DoricFramework } from 'doric-framework'
-import widgets from "@/components/doric-widgets/Widgets"
-// Other code (e.g. workspace) omitted for brevity
+
+// If your Widget map is not in index.ts, you will need to specify it.
+import widgets from "@/components/doric-widgets/"
+...
 </script>
 
 <template>
   <DoricFramework :widgets="widgets" />
 </template>
+```
+
+<p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
+
+
+## Advanced
+
+### Doric Framework Props
+
+The DoricFramework component accepts the following props:
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `widgets` | `WidgetComponentMap` | A map of widget types to default labels and widget components (see example above). |
+| `workspace` | `Workspace` | A list of columns, each of which is a list of widgets. A minimal Widget is an object that includes a type, which is a key in the `WidgetComponentMap`. |
+| `initialState` | `WidgetInputState` | The initial state of the Doric workspace. An array to populate input values `{ widgetId: string, key: string, value: any }`. This is useful for hydrating state from localstorage, an API, or the URL. |
+| `locked` | `boolean` | Whether the workspace is locked. |
+| `setSharedParams` | `Function` | A callback function that is fired whenever a widget's input value changes and it is marked as `shared`. |
+
+### Exporting the Current Workspace
+
+The `doric-framework` package also provides the `exportWorkspace` function. This function serializes the current workspace into a minimal `Workspace`. That is, a `Widget[][]` including the position of widgets in columns as well as their non-falsy input values, subscription, sharing states.
+
+It may be imported alongside the `DoricFramework` component as follows:
+
+```vue
+// App.vue
+<script setup>
+import { DoricFramework, exportWorkspace } from 'doric-framework'
+</script>
 ```
 
 <p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
