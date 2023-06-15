@@ -12,7 +12,7 @@
     - [Basic Usage](#basic-usage)
     - [Writing Widgets](#writing-widgets)
     - [Passing Widgets to Doric](#passing-widgets-to-doric)
-    - [Advanced](#advanced-usage)
+    - [API Reference](#api-reference)
         - [Doric Framework Props](#doric-framework-props)
         - [Exporting the Current Workspace](#exporting-the-current-workspace)
 - [License](#license)
@@ -191,7 +191,7 @@ import widgets from "@/components/doric-widgets/"
 <p align="right">(<a href="#doric-framework-readme-top">back to top</a>)</p>
 
 
-## Advanced
+## API Reference
 
 ### Doric Framework Props
 
