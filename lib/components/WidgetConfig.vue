@@ -139,7 +139,7 @@ select {
 }
 
 input[type="text"] {
-  @apply inline-block w-full border border-gray-300 text-gray-900 text-sm rounded block py-1 px-2
+  @apply inline-block w-full p-0.5 border border-gray-300 text-gray-900 text-sm rounded block py-1 px-2
 }
 
 .shared-toggle input {

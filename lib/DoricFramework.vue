@@ -235,8 +235,8 @@ const getHeaderColor = (widgetId: WidgetId) => {
     return "bg-gray-100"
   }
   return configWidget.value === widgetId
-    ? "bg-blue-200 group-hover:bg-blue-300"
-    : "bg-gray-100 group-hover:bg-gray-200"
+    ? "bg-blue-100 group-hover:bg-blue-200"
+    : "bg-gray-50 group-hover:bg-gray-100"
 }
 
 const subscriptionClasses = {
@@ -292,7 +292,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
         <draggable class="list-group" :list="column" group="widgets" @change="handleRearrange(index, $event)" itemKey="id"
           handle=".drag-handle">
           <template #item="{ element }">
-            <div class="relative m-1">
+            <div class="relative mx-1 my-2">
               <button v-if="subscriptionMode.input && configWidget !== element.id"
                 @click="() => toggleSubscription(element.id)" class="subscription-helper"
                 :class="getSubscriptionClass(subscriptionMode.widgetId, subscriptionMode.input, element.id)">
@@ -354,20 +354,22 @@ const toggleSubscription = (widgetId: WidgetId) => {
 
         <div v-if="!locked" class="column-buttons">
           <div class="center">
-            <button v-if="column.length === 0" @click="() => removeColumn(index)">
+            <button class="remove-column-button" v-if="column.length === 0" @click="() => removeColumn(index)">
               Remove Column
             </button>
           </div>
           <div>
             <div class="center">
-              <button v-if="showWidgetsToAddColumn === -1" @click="() => setColumnToAddWidget(index)">
-                +
-              </button>
-              <button v-else-if="showWidgetsToAddColumn === index" @click="() => setColumnToAddWidget(-1)">
-                x
+              <button :class="'add-widget-button ' + (index === showWidgetsToAddColumn ? 'toggled' : '')"
+                @click="() => setColumnToAddWidget(index === showWidgetsToAddColumn ? -1 : index)" title="Add Widget">
+                <!-- `plus` icon from https://heroicons.com/, MIT license -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
               </button>
             </div>
-            <div class="add-widget-list" :class="{ invisible: showWidgetsToAddColumn !== index }">
+            <div class="add-widget-list" :class="{ collapsed: showWidgetsToAddColumn !== index }">
               <button v-for="(widgetType) in Object.keys(widgets)" :key="widgetType"
                 @click="() => addWidget(widgetType, index)">
                 {{ widgets[widgetType].defaultLabel }}
@@ -383,7 +385,15 @@ const toggleSubscription = (widgetId: WidgetId) => {
         <!-- This is just a placeholder to receive widgets and create columns on the fly -->
       </template>
     </draggable>
-    <div v-if="!locked" class="column-insert"><button @click="addColumn(getWorkspaceShape().length)">+</button></div>
+    <div v-if="!locked" class="column-insert">
+      <button @click="addColumn(getWorkspaceShape().length)">
+        <!-- `plus mini` icon from https://heroicons.com/, MIT license -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+          <path
+            d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+        </svg>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -442,6 +452,18 @@ const toggleSubscription = (widgetId: WidgetId) => {
         }
       }
 
+      input[type="text"] {
+        @apply p-0.5 text-sm border-none bg-blue-100 text-gray-900 text-sm rounded block py-1 px-2 outline-none;
+
+        &:hover {
+          @apply bg-blue-50;
+        }
+
+        &:focus {
+          @apply bg-white;
+        }
+      }
+
       &.drag-handle {
         cursor: grab;
       }
@@ -495,31 +517,85 @@ const toggleSubscription = (widgetId: WidgetId) => {
   }
 
   .column-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    @apply flex flex-col items-center mt-2 mx-2;
 
     .center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      @apply flex flex-col items-center w-full;
+
+      .remove-column-button {
+        @apply w-full mb-3 p-2 bg-gray-100 text-gray-600 rounded-sm text-sm font-bold border-none;
+        transition: none;
+
+        &:hover {
+          @apply bg-red-100 text-red-800;
+        }
+
+        &:active {
+          @apply scale-90;
+        }
+      }
+
+      .add-widget-button {
+        @apply flex justify-center items-center p-1 rounded-full bg-gray-50 border-2 border-gray-200 text-gray-600 z-10;
+        transition: transform 60ms ease;
+        transform-origin: center;
+
+        &.toggled {
+          @apply text-red-800;
+          transform: rotate(45deg);
+
+          &:hover {
+            @apply bg-gray-200 text-red-800 border-gray-300;
+          }
+        }
+
+        &:hover {
+          @apply bg-blue-200 text-blue-800 border-blue-300;
+        }
+
+        &:active {
+          @apply scale-90;
+        }
+      }
     }
 
     .add-widget-list {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #eee;
-      padding: 0.5rem;
-      margin: 0.2rem;
-      border: 1px solid #000;
-      border-radius: 3px;
+      @apply flex flex-col items-center m-1 mb-4 p-2 rounded bg-gray-50 border-2 border-gray-200;
+      margin-top: -0.9rem;
+      padding-top: 1rem;
+      overflow: hidden;
+      transition-property: transform, height;
+      transition-delay: 0s, 120ms;
+      transition-duration: 120ms, 0s;
+      transition-timing-function: ease, linear;
+      transform-origin: 50% 0%;
+
+      &.collapsed {
+        transform: scale(0);
+        height: 0;
+      }
 
       button {
-        margin: 0.2rem;
+        @apply m-1 py-2 px-8 text-sm font-bold border-none bg-gray-200 text-gray-700 rounded;
+
+        &:hover {
+          @apply bg-blue-100 text-blue-800;
+        }
       }
     }
   }
+}
+
+.column-insert {
+  @apply ml-1;
+
+  button {
+   @apply h-full w-6 flex items-center justify-center bg-gray-200 text-gray-600 border-none rounded-none;
+ 
+   &:hover {
+     @apply bg-blue-200 text-blue-800;
+   }
+ }
 }
 </style>
 
