@@ -405,6 +405,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
   margin: 0 0.1rem;
   overflow: hidden;
   height: 100%;
+  text-align: left;
 
   .doric-widget-framework__widget {
     position: relative;
