@@ -99,12 +99,10 @@ Doric displays instance of widgets, which are Vue components. A minimal widget i
 
 ```vue
 <script setup>
-const props = defineProps({
-  useDoricOutput: Function,
-  useDoricInput: Function,
-})
-const setOsisRef = props.useDoricOutput("osisRef");
-const osisRef = props.useDoricInput("osisRef");
+import { useDoricOutput, useDoricInput } from 'doric-framework';
+
+const setOsisRef = useDoricOutput("osisRef");
+const osisRef = useDoricInput("osisRef");
 </script>
 
 <template>
@@ -127,20 +125,23 @@ const osisRef = props.useDoricInput("osisRef");
     <button @click="setOsisRef(osisRef)">Set osisRef</button>
   </div>
 </template>
-  
+
 <script>
+import { useDoricOutput, useDoricInput } from 'doric-framework';
+
 export default {
-    props: ['useDoricOutput', 'useDoricInput'],
-    data() {
-        return {
-            // Define input methods
-            osisRef: this.useDoricInput("osisRef");
-        }
-    },
-    created() {
-        // Define output methods
-        this.setOsisRef = this.useDoricOutput("osisRef");
-    },
+  data() {
+    return {
+      // Define input methods
+      osisRef: useDoricInput("osisRef"),
+    }
+  },
+  setup() {
+    // Define output methods
+    return {
+      setOsisRef: useDoricOutput("osisRef"),
+    }
+  },
 }
 </script>  
 ```

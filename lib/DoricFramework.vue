@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type {
   WidgetInputState,
-  UseDoricInputOptions,
   WidgetId,
   Workspace,
   WidgetComponentMap,
@@ -11,8 +10,6 @@ import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import draggable from "vuedraggable"
 import {
-  getUseDoricInput,
-  getUseDoricOutput,
   getWorkspaceShape,
   setWorkspace,
   insertColumn as insertDoricColumn,
@@ -56,6 +53,7 @@ const emit = defineEmits(['setSharedParameters'])
 
 import DoricWidgetConfig from './components/WidgetConfig.vue'
 import DoricMissingWidget from './components/MissingWidget.vue'
+import ScopedComponent from './components/ScopedComponent.vue'
 
 const loadingWorkspace = ref(false)
 const configWidget = ref("")
@@ -341,9 +339,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
                 whether or not it's visible -->
                 <div :class="{ 'hidden': configWidget === element.id }" class="p-1">
                   <div class="widget" v-if="element?.type in widgets && 'widget' in widgets[element.type]">
-                    <component :is="widgets[element.type].widget"
-                      :useDoricOutput="(param: string) => getUseDoricOutput(element.id, param)"
-                      :useDoricInput="(param: string, options: UseDoricInputOptions) => getUseDoricInput(element.id, param, options)" />
+                    <ScopedComponent :widget="widgets[element.type].widget" :widgetId="element.id" />
                   </div>
                   <DoricMissingWidget :type="element?.type" v-else />
                 </div>

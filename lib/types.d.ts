@@ -73,4 +73,10 @@ export type DefaultLabels = {
 
 export type UseDoricInputOptions = {
     shared?: boolean
+} | undefined
+
+export type UseDoricInputFunction = (inputKey: string, options?: UseDoricInputOptions) => {
+    value: string
 }
+
+export type UseDoricOutputFunction = (inputKey: string) => (value: any) => void
