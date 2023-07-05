@@ -528,7 +528,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
         }
 
         &:active {
-          @apply scale-90;
+          @apply scale-95;
         }
       }
 
@@ -586,11 +586,14 @@ const toggleSubscription = (widgetId: WidgetId) => {
 .column-insert {
   @apply ml-1;
 
-  button {
-   @apply h-full w-6 flex items-center justify-center bg-gray-200 text-gray-600 border-none rounded-none;
+  > button {
+   @apply h-full w-6 p-0 m-0 flex items-center justify-center bg-gray-200 text-gray-600 border-none rounded-none;
  
    &:hover {
      @apply bg-blue-200 text-blue-800;
+   }
+   &:active {
+     @apply bg-blue-300;
    }
  }
 }
