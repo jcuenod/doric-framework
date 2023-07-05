@@ -86,9 +86,9 @@ const turnOffSubscriptionMode = () => {
             <div class="table-cell pb-1 pr-2">Share:</div>
             <div class="table-cell pb-1 truncate">
               <div class="flex flex-row justify-between shared-toggle">
-                <input class="hidden" type="checkbox" :id="widgetId" :checked="widget.inputs[key].shared"
+                <input style="display: none;" type="checkbox" :id="`${widgetId}.${key}`" :checked="widget.inputs[key].shared"
                   @change="toggleShared(key)" />
-                <label :for="widgetId">
+                <label :for="`${widgetId}.${key}`">
                   <div class="dot">
                   </div>
                 </label>
