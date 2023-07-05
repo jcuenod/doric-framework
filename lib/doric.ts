@@ -258,7 +258,7 @@ const sharedParameters = () => {
   return store.sharedParameters
 }
 
-const injectWorkspaceState = (stateArray: WidgetInputState[]) => {
+const pushWorkspaceState = (stateArray: WidgetInputState[]) => {
   const store = useDoricStore()
   stateArray.forEach(({ widgetId, key, value }) => {
     const widget = store.widgets.find(w => w.id === widgetId)
@@ -403,7 +403,7 @@ export {
   addWidget,
   removeWidget,
   moveWidget,
-  injectWorkspaceState,
+  pushWorkspaceState,
   sharedParameters,
   setDefaultLabels,
   exportWorkspace,

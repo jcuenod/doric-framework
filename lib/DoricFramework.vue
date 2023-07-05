@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type {
-  WidgetInputState,
   WidgetId,
   Workspace,
   WidgetComponentMap,
 } from './types'
-import { defineComponent, nextTick, ref, watch, PropType } from 'vue'
+import { defineComponent, ref, watch, PropType } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import draggable from "vuedraggable"
@@ -17,7 +16,6 @@ import {
   addWidget as addDoricWidget,
   removeWidget as removeDoricWidget,
   moveWidget as moveDoricWidget,
-  injectWorkspaceState,
   sharedParameters,
   setDefaultLabels,
   getWidget,
@@ -40,16 +38,11 @@ const props = defineProps({
     required: true,
     default: () => ([[]]),
   },
-  initialState: {
-    type: Array as PropType<WidgetInputState[]>,
-    required: false,
-    default: () => ([]),
-  },
 })
 
 setDefaultLabels(Object.fromEntries(Object.keys(props.widgets).map(key => [key, props.widgets[key].defaultLabel])))
 
-const emit = defineEmits(['setSharedParameters'])
+const emit = defineEmits(['setSharedParameters', 'onWorkspaceReady'])
 
 import DoricWidgetConfig from './components/WidgetConfig.vue'
 import DoricMissingWidget from './components/MissingWidget.vue'
@@ -81,26 +74,12 @@ const pushWorkspace = (newWorkspace: unknown) => {
   turnOffConfigMode()
   setWorkspace(newWorkspace).then(() => {
     loadingWorkspace.value = false
+  }).then(() => {
+    emit("onWorkspaceReady")
   })
 }
 watch(() => props.workspace, pushWorkspace)
 pushWorkspace(props.workspace)
-
-const pushState = (newInitialState: WidgetInputState[]) => {
-  if (!newInitialState) {
-    return
-  }
-  const waitForWorkspace = () => {
-    if (loadingWorkspace.value) {
-      nextTick(waitForWorkspace)
-      return
-    }
-    injectWorkspaceState(newInitialState)
-  }
-  nextTick(waitForWorkspace)
-}
-watch(() => props.initialState as WidgetInputState[], pushState)
-pushState(props.initialState as WidgetInputState[])
 
 watch(sharedParameters, (newSharedParameters, oldSharedParameters) => {
   emit("setSharedParameters", newSharedParameters, oldSharedParameters)
@@ -200,13 +179,8 @@ defineComponent({
       required: true,
       default: () => ([]),
     },
-    initialState: {
-      type: Array as PropType<WidgetInputState[]>,
-      required: false,
-      default: () => ([]),
-    },
   },
-  emits: ['setSharedParameters'],
+  emits: ['setSharedParameters', 'onWorkspaceReady'],
 })
 
 const setSubscriptionMode = (widgetId: WidgetId | null, input: string) => {

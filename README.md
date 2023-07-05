@@ -64,7 +64,7 @@ npm install --save doric-framework
 ```vue
 <script setup lang="ts">
 // Required imports for Doric
-import { DoricFramework } from 'doric-framework'
+import DoricFramework from 'doric-framework'
 import "doric-framework/dist/style.css"
 
 // Import a map of your widgets from index.ts at this path
@@ -177,7 +177,7 @@ These widgets can then be passed to Doric as follows:
 ```vue
 <!-- App.vue -->
 <script> 
-import { DoricFramework } from 'doric-framework'
+import DoricFramework from 'doric-framework'
 
 // If your Widget map is not in index.ts, you will need to specify it.
 import widgets from "@/components/doric-widgets/"
@@ -202,20 +202,76 @@ The DoricFramework component accepts the following props:
 | --- | --- | --- |
 | `widgets` | `WidgetComponentMap` | A map of widget types to default labels and widget components (see example above). |
 | `workspace` | `Workspace` | A list of columns, each of which is a list of widgets. A minimal Widget is an object that includes a type, which is a key in the `WidgetComponentMap`. |
-| `initialState` | `WidgetInputState` | An array to populate input values of the workspace with elements in the form: `{ widgetId: string, key: string, value: any }`. This is useful for hydrating state from localstorage, an API, or the URL. Widget inputs may be defined in workspaces as well. This field is useful for user/session specific values. |
 | `locked` | `boolean` | Whether the workspace is locked. |
-| `setSharedParams` | `Function` | A callback function that is fired whenever a widget's input value changes and it is marked as `shared`. |
+| `@setSharedParams` | `Function` | A callback function that is emitted whenever a widget's input value changes and it is marked as `shared`. |
+| `@onWorkspaceReady` | `Function` | A callback function that is emitted after the `workspace` property has been changed and the new workspace is ready. Useful for setting initial state. |
+
+### Pushing State to the Workspace
+
+Doric exports the `pushWorkspaceState` function for pushing state to the current workspace. The main use of `pushWorkspaceState` is to set initial values (e.g., from localstorage or a url), but state may also come from outside Doric in realtime applications. `pushWorkspaceState` expects a `WidgetInputState[]`. `WidgetInputState` is an object with three fields:
+
+```ts
+type WidgetInputState = {
+  widgetId: string;
+  key: string;
+  value: any;
+};
+```
+
+To set initial state, your application may look something like this:
+
+```vue
+<script setup>
+import DoricFramework, { pushWorkspaceState } from "doric-framework";
+import widgets from "@/components/doric-widgets/";
+
+const workspace = [
+  [{
+    type: "passage-ref",
+  }, {
+    type: "dictionary",
+  }],
+  [{
+    type: "text-display",
+  }]
+]
+
+// Set initial state
+const onWorkspaceReady = () => {
+  pushWorkspaceState([
+    {
+      widgetId: "passage-ref",
+      key: "osisRef",
+      value: "Gen.1.1",
+    },
+    {
+      widgetId: "dictionary",
+      key: "selectedLemma",
+      value: "λογός",
+    },
+  ]);
+};
+</script>
+
+<template>
+  <DoricFramework
+    :widgets="widgets"
+    :workspace="workspace"
+    @onWorkspaceReady="onWorkspaceReady"
+  />
+</template>
+```
 
 ### Exporting the Current Workspace
 
-The `doric-framework` package also provides the `exportWorkspace` function. This function serializes the current workspace into a minimal `Workspace`—i.e., a `Widget[][]` that includes the position of widgets in columns as well as their non-falsy input values, subscription, sharing states. Thus, the return type of `exportWorkspace` may be passed into `<DoricFramework />` as the `workspace` prop. This allows workspace state to be restored across sessions.
+The `doric-framework` package provides an `exportWorkspace` function. This function serializes the current workspace into a minimal `Workspace`—i.e., a `Widget[][]` that includes the position of widgets in columns as well as their non-falsy input values, subscription, sharing states. Thus, the return type of `exportWorkspace` may be passed into `<DoricFramework />` as the `workspace` prop. This allows workspace state to be restored across sessions.
 
 It may be imported alongside the `DoricFramework` component as follows:
 
 ```vue
 // App.vue
 <script setup>
-import { DoricFramework, exportWorkspace } from 'doric-framework'
+import DoricFramework, { exportWorkspace } from 'doric-framework'
 </script>
 ```
 
