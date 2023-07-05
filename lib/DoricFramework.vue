@@ -398,7 +398,7 @@ const toggleSubscription = (widgetId: WidgetId) => {
   display: flex;
   flex-direction: row;
   flex: 1;
-  margin: 0 0.1rem;
+  margin-left: 0.25rem; // i.e. ml-1 (normalizes spacing of panes)
   overflow: hidden;
   height: 100%;
   text-align: left;
